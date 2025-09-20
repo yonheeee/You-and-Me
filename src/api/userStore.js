@@ -1,16 +1,22 @@
 // src/api/userStore.js
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist /*, createJSONStorage*/ } from "zustand/middleware";
+
+const STORAGE_KEY = "user-storage";
+
+const initial = {
+  user: null, // { accessToken, ... }
+  jwt: null,
+  firebaseCustomToken: null,
+  isInitialized: false,
+};
 
 const useUserStore = create(
   persist(
     (set, get) => ({
-      user: null, // { accessToken, ... } 포함
-      jwt: null,
-      firebaseCustomToken: null,
-      isInitialized: false,
+      ...initial,
 
-      // ✅ 객체 또는 함수(updater) 모두 허용
+      // 객체 또는 함수(updater) 허용
       setUser: (userOrUpdater) => {
         if (typeof userOrUpdater === "function") {
           set((state) => {
@@ -33,7 +39,7 @@ const useUserStore = create(
         set({ user: next });
       },
 
-      // ✅ accessToken만 교체(리프레시에서 사용)
+      // accessToken만 교체(리프레시에서 사용)
       setAccessToken: (accessToken) => {
         const prev = get().user || {};
         const next = { ...prev, accessToken };
@@ -51,12 +57,7 @@ const useUserStore = create(
           signalCredits:
             signalCredits !== undefined ? signalCredits : prev.signalCredits,
         };
-        console.log(
-          "🟢 [UserStore] updateCredits:",
-          { matchCredits, signalCredits },
-          "=>",
-          next
-        );
+        console.log("🟢 [UserStore] updateCredits:", { matchCredits, signalCredits }, "=>", next);
         set({ user: next });
       },
 
@@ -64,21 +65,26 @@ const useUserStore = create(
         console.log("🟢 [UserStore] setJwt:", !!jwt);
         set({ jwt });
       },
+
       setFirebaseCustomToken: (firebaseCustomToken) => {
-        console.log(
-          "🟢 [UserStore] setFirebaseCustomToken:",
-          !!firebaseCustomToken
-        );
+        console.log("🟢 [UserStore] setFirebaseCustomToken:", !!firebaseCustomToken);
         set({ firebaseCustomToken });
       },
 
-      clearUser: () => {
-        console.log("🔴 [UserStore] clearUser");
+      // ✅ 로그아웃 단일 진입점
+      clearAuth: () => {
+        console.log("🔴 [UserStore] clearAuth");
         set({ user: null, jwt: null, firebaseCustomToken: null });
       },
+
+      // 하위호환 별칭
+      clearUser: () => {
+        console.log("🔴 [UserStore] clearUser -> clearAuth");
+        get().clearAuth();
+      },
       logout: () => {
-        console.log("🔴 [UserStore] logout");
-        set({ user: null, jwt: null, firebaseCustomToken: null });
+        console.log("🔴 [UserStore] logout -> clearAuth");
+        get().clearAuth();
       },
 
       setInitialized: (value) => {
@@ -87,7 +93,18 @@ const useUserStore = create(
       },
     }),
     {
-      name: "user-storage",
+      name: STORAGE_KEY,
+      // storage: createJSONStorage(() => localStorage),
+
+      // 스토리지 복원 완료 시점 표시
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error("❌ [UserStore] Rehydrate error:", error);
+        }
+        state?.setInitialized?.(true);
+      },
+
+      version: 1,
     }
   )
 );

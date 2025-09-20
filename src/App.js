@@ -1,18 +1,18 @@
 // src/App.jsx
 import React, { useEffect, useState } from "react";
 import AppRouter from "./Router";
-import api, { willExpireSoon } from "./api/axios";
+import { willExpireSoon, refreshAccessToken } from "./api/axios";
 import useUserStore from "./api/userStore.js";
 
 import { auth } from "./libs/firebase";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import Loader from "./jsx/common/Loader.jsx"; // ✅ 로더 임포트
+import Loader from "./jsx/common/Loader.jsx";
 
 export default function App() {
   const { isInitialized, setInitialized } = useUserStore();
   const [authReady, setAuthReady] = useState(false);
 
-  // ✅ Firebase 익명 로그인 (앱 시작 시 1회)
+  // Firebase 익명 로그인 (앱 시작 시 1회)
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
       try {
@@ -28,13 +28,20 @@ export default function App() {
     return unsub;
   }, []);
 
-  // ✅ 기존 토큰 리프레시 부팅 로직 유지
+  // 부팅 시 리프레시 시도 (만료 임박/무토큰 모두)
   useEffect(() => {
     const bootstrap = async () => {
       try {
         const access = useUserStore.getState().user?.accessToken;
+
+        // 1) 토큰이 있으면 만료 임박 시 갱신
         if (access && willExpireSoon(access, 90)) {
-          await api.post("/auth/refresh");
+          await refreshAccessToken().catch(() => {});
+        }
+
+        // 2) 토큰이 없어도 httpOnly refresh 쿠키가 살아있다면 자동 로그인 복구
+        if (!access) {
+          await refreshAccessToken().catch(() => {});
         }
       } catch (e) {
         console.error("초기 부팅 중 오류:", e);
@@ -45,7 +52,7 @@ export default function App() {
     bootstrap();
   }, [setInitialized]);
 
-  // 🔒 인증/부팅 둘 다 준비되면 렌더
+  // 인증/부팅 둘 다 준비되면 렌더
   if (!isInitialized || !authReady) {
     return (
       <div

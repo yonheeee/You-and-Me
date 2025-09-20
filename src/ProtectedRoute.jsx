@@ -1,11 +1,20 @@
 // src/ProtectedRoute.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import useUserStore from "./api/userStore";
+import { refreshAccessToken, willExpireSoon } from "./api/axios";
 
 const ProtectedRoute = ({ children }) => {
   const { user, isInitialized } = useUserStore();
   const location = useLocation();
+
+  // 선택: 렌더 직전 한 번 선제 리프레시
+  useEffect(() => {
+    const access = user?.accessToken;
+    if (access && willExpireSoon(access, 90)) {
+      refreshAccessToken().catch(() => {});
+    }
+  }, [user?.accessToken]);
 
   // 1) 아직 앱 초기화 전 → 로딩 표시
   if (!isInitialized) {
