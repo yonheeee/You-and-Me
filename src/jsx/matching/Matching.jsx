@@ -1,8 +1,10 @@
+// src/jsx/matching/Matching.jsx
 import React, { useRef, useState, useEffect } from "react";
 import api from "../../api/axios";
 import Card from "./Card";
-import Nohuman from "./Nohuman"; // ✅ 추가
+import Nohuman from "./Nohuman";
 import "../../css/matching/Matching.css";
+import useUserStore from "../../api/userStore"; // ✅ 스토어 임포트
 
 import starImg from "../../image/matching/star.svg";
 import unKnownImg from "../../image/matching/unknown.svg";
@@ -33,13 +35,17 @@ export default function Matching() {
   const N = PLACEHOLDER_COUNT;
   const [center, setCenter] = useState(0);
   const centerRef = useRef(center);
-  useEffect(() => { centerRef.current = center; }, [center]);
+  useEffect(() => {
+    centerRef.current = center;
+  }, [center]);
 
   const [dx, setDx] = useState(0);
   const [snapping, setSnapping] = useState(false);
   const [dir, setDir] = useState("");
   const snappingRef = useRef(false);
-  useEffect(() => { snappingRef.current = snapping; }, [snapping]);
+  useEffect(() => {
+    snappingRef.current = snapping;
+  }, [snapping]);
 
   const dragging = useRef(false);
   const lastX = useRef(0);
@@ -50,8 +56,13 @@ export default function Matching() {
   const SNAP_MS = 260;
   const MAX_DRAG = CARD_W + GAP;
 
-  const onStart = (x) => { dragging.current = true; setSnapping(false); setDir(""); lastX.current = x; };
-  const onMove  = (x) => {
+  const onStart = (x) => {
+    dragging.current = true;
+    setSnapping(false);
+    setDir("");
+    lastX.current = x;
+  };
+  const onMove = (x) => {
     if (!dragging.current) return;
     const delta = x - lastX.current;
     lastX.current = x;
@@ -62,7 +73,10 @@ export default function Matching() {
     setDir(sign < 0 ? "dir-left" : "dir-right");
     setDx(sign * SPREAD);
     window.setTimeout(() => {
-      const nextCenter = sign < 0 ? (centerRef.current + 1) % N : (centerRef.current - 1 + N) % N;
+      const nextCenter =
+        sign < 0
+          ? (centerRef.current + 1) % N
+          : (centerRef.current - 1 + N) % N;
       centerRef.current = nextCenter;
       setCenter(nextCenter);
       setSnapping(false);
@@ -76,7 +90,11 @@ export default function Matching() {
     const absDx = Math.abs(dx);
     const sign = dx < 0 ? -1 : 1;
     if (absDx >= MAX_DRAG / 2) completeSlide(sign);
-    else { setSnapping(true); setDx(0); setTimeout(() => setSnapping(false), SNAP_MS); }
+    else {
+      setSnapping(true);
+      setDx(0);
+      setTimeout(() => setSnapping(false), SNAP_MS);
+    }
   };
 
   const CardBodyDemo = () => (
@@ -143,6 +161,16 @@ export default function Matching() {
       const resp = await api.post("/match/start");
       const list = normalizeList(resp?.data);
 
+      // ✅ 성공 직후 내 프로필 재조회 → 스토어 최신화
+      try {
+        const refreshed = await api.get("/users/me/profile");
+        if (refreshed?.data) {
+          useUserStore.getState().updateUser(refreshed.data);
+        }
+      } catch (profileErr) {
+        console.warn("⚠️ 프로필 재조회 실패:", profileErr);
+      }
+
       // 최소 스핀 시간 보장
       const elapsed = Date.now() - t0;
       if (elapsed < MIN_SPIN_MS) await sleep(MIN_SPIN_MS - elapsed);
@@ -153,7 +181,10 @@ export default function Matching() {
       setGoCard(true);
     } catch (err) {
       console.error("❌ 매칭 실패:", err);
-      const msg = err?.response?.data?.message || err?.message || "매칭 중 오류 발생";
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "매칭 중 오류 발생";
       setMessage(msg);
       stopPreSpin();
       setLoading(false);
@@ -163,7 +194,7 @@ export default function Matching() {
   // ✅ 결과 분기 처리
   if (goCard) {
     if (resultList.length === 0) {
-      return <Nohuman />; // 👉 빈 배열이면 안내 화면
+      return <Nohuman />;
     }
     return <Card initialCandidates={resultList} />;
   }
@@ -176,10 +207,10 @@ export default function Matching() {
         <div
           className={`card-wrap ${snapping ? "snapping" : ""} ${dir}`}
           onTouchStart={(e) => onStart(e.touches[0].clientX)}
-          onTouchMove={(e)  => onMove(e.touches[0].clientX)}
+          onTouchMove={(e) => onMove(e.touches[0].clientX)}
           onTouchEnd={onEnd}
           onMouseDown={(e) => onStart(e.clientX)}
-          onMouseMove={(e)  => onMove(e.clientX)}
+          onMouseMove={(e) => onMove(e.clientX)}
           onMouseUp={onEnd}
           onMouseLeave={onEnd}
         >
@@ -189,10 +220,14 @@ export default function Matching() {
               key={idx}
               className="slot"
               style={{
-                transform: `translate(calc(-50% + ${(-2 + idx) * SPREAD + dx}px), -50%)`,
+                transform: `translate(calc(-50% + ${
+                  (-2 + idx) * SPREAD + dx
+                }px), -50%)`,
               }}
             >
-              <div className="card-m"><CardBodyDemo /></div>
+              <div className="card-m">
+                <CardBodyDemo />
+              </div>
             </div>
           ))}
         </div>
@@ -208,7 +243,9 @@ export default function Matching() {
           </button>
         </div>
         {message && (
-          <p style={{ textAlign: "center", marginTop: "0.5rem" }}>{message}</p>
+          <p style={{ textAlign: "center", marginTop: "0.5rem" }}>
+            {message}
+          </p>
         )}
       </div>
     </div>

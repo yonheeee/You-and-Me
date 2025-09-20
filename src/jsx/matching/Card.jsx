@@ -31,7 +31,7 @@ export default function Card({ initialCandidates = [] }) {
     setCandidates(Array.isArray(initialCandidates) ? initialCandidates : []);
   }, [initialCandidates]);
 
-  const { user, setUser } = useUserStore();
+  const { user } = useUserStore();
   const [selectedUserId, setSelectedUserId] = useState(null);
 
   const [center, setCenter] = useState(0);
@@ -126,7 +126,7 @@ export default function Card({ initialCandidates = [] }) {
     }, SNAP_MS);
   };
 
-  // 다시 매칭: API로 새 목록 교체(크레딧 차감은 userStore만 사용)
+  // 다시 매칭: API로 새 목록 교체(크레딧 차감은 서버에 맡기고, 성공 후 프로필 재조회)
   const handleRematch = async () => {
     const credits = user?.matchCredits ?? 0;
     if (credits <= 0) {
@@ -145,11 +145,15 @@ export default function Card({ initialCandidates = [] }) {
 
       setCandidates(nextList);
 
-      // 안전 차감
-      setUser((prev) => ({
-        ...prev,
-        matchCredits: Math.max(0, (prev?.matchCredits ?? 0) - 1),
-      }));
+      // ✅ 성공 직후 프로필 재조회 → 스토어 최신화
+      try {
+        const refreshed = await api.get("/users/me/profile");
+        if (refreshed?.data) {
+          useUserStore.getState().updateUser(refreshed.data);
+        }
+      } catch (profileErr) {
+        console.warn("⚠️ 프로필 재조회 실패:", profileErr);
+      }
 
       // 위치/상태 초기화
       setCenter(0);
@@ -295,7 +299,9 @@ export default function Card({ initialCandidates = [] }) {
 
   return (
     <>
-      <div className="title">프로필 사진을 눌러 <br/> 원하는 상대에게 플러팅하세요</div>
+      <div className="title">
+        프로필 사진을 눌러 <br /> 원하는 상대에게 플러팅하세요
+      </div>
 
       <div className="card-root">
         <div

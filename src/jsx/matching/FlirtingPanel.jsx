@@ -10,7 +10,6 @@ export default function FlirtingPanel({ targetUserId, onSent }) {
 
   // ✅ 필요한 값만 각각 구독 (객체 리턴 X)
   const signalCredits = useUserStore((s) => s.user?.signalCredits ?? 0);
-  const updateCredits = useUserStore((s) => s.updateCredits);
 
   // ✅ 마운트/targetUserId 변경시에만 상태 조회
   useEffect(() => {
@@ -35,7 +34,10 @@ export default function FlirtingPanel({ targetUserId, onSent }) {
         // 404 = 아직 안 보냄
         if (err?.response?.status === 404) {
           setAlreadySent((prev) => (prev === false ? prev : false));
-        } else if (err?.name === "CanceledError" || err?.name === "AbortError") {
+        } else if (
+          err?.name === "CanceledError" ||
+          err?.name === "AbortError"
+        ) {
           // 취소된 요청 무시
         } else {
           console.error("❌ 플러팅 상태 확인 실패:", err);
@@ -57,21 +59,24 @@ export default function FlirtingPanel({ targetUserId, onSent }) {
       return;
     }
 
-    if (!window.confirm("플러팅을 보내시겠습니까?\n신호 1회가 차감됩니다.")) return;
+    if (!window.confirm("플러팅을 보내시겠습니까?\n신호 1회가 차감됩니다."))
+      return;
 
     try {
       setLoading(true);
-      const resp = await api.post(`/signals/${targetUserId}`);
+      await api.post(`/signals/${targetUserId}`);
 
-      // 서버가 남은 크레딧을 주면 그 값 사용, 아니면 -1
-      const left =
-        typeof resp?.data?.remainingCredits === "number"
-          ? resp.data.remainingCredits
-          : Math.max(0, (signalCredits ?? 0) - 1);
+      // ✅ 성공 직후 프로필 재조회 → 스토어 최신화
+      try {
+        const refreshed = await api.get("/users/me/profile");
+        if (refreshed?.data) {
+          useUserStore.getState().updateUser(refreshed.data);
+        }
+      } catch (profileErr) {
+        console.warn("⚠️ 프로필 재조회 실패:", profileErr);
+      }
 
       setAlreadySent(true);
-      updateCredits({ signalCredits: left }); // ✅ 객체 인자
-
       onSent?.(targetUserId);
       alert("플러팅을 보냈습니다!");
     } catch (err) {
@@ -88,7 +93,7 @@ export default function FlirtingPanel({ targetUserId, onSent }) {
     } finally {
       setLoading(false);
     }
-  }, [targetUserId, alreadySent, loading, signalCredits, updateCredits, onSent]);
+  }, [targetUserId, alreadySent, loading, signalCredits, onSent]);
 
   return (
     <div className="flirting-panel">
