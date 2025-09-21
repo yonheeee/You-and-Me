@@ -13,7 +13,7 @@ import MatchingEntry from "./jsx/matching/MatchingEntry.jsx";
 import MyPage from "./jsx/mypage/MyPage";
 
 import LoginPage from "./jsx/signup/LoginPage";
-import InfoForm from "./jsx/signup/InfoForm";
+import InfoForm from "./jsx/signup/InfoForm2";
 import QPage from "./jsx/signup/QPage";
 import ResultPage from "./jsx/signup/ResultPage";
 

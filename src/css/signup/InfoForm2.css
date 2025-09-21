@@ -1,0 +1,691 @@
+/* InfoForm.css */
+/* ===== 테마 변수 ===== */
+:root {
+  --bg: #fff;
+  --text: #333;
+  --muted: #8f8f8f;
+  --line: #e3e6ea;
+  --primary: #ff69c3;
+  --btn-disabled-text: #9aa0a6;
+  --btn-disabled-border: #c9cfd6;
+
+  --card-max: 430px;
+  --radius: 12px;
+  --radius-pill: 9999px;
+
+  --space: 1rem;
+  --space-lg: 1.25rem;
+
+  --ui-font: "AlimamaFangYuanVF", "Noto Sans KR", system-ui;
+
+  --sheet-height: 88vh;
+}
+
+/* 화면 컨테이너 */
+.profile-root {
+  min-height: 100dvh;
+  background: var(--bg);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.form-shell {
+  width: min(100%, var(--card-max));
+  padding: 6vh 1rem 2rem;
+  box-sizing: border-box;
+}
+
+/* 타이틀 */
+.page-title {
+  margin: 0 auto;
+  text-align: center;
+  font-family: var(--ui-font);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  color: var(--text);
+  letter-spacing: 0.01em;
+}
+
+.page-subtitle {
+  margin: 0.5rem 0 4rem; /* 제목과 약간 간격 */
+  text-align: center; /* 제목과 동일하게 중앙정렬 */
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: red;
+  font-family: var(--ui-font);
+}
+
+/* 공통 필드 */
+.info-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: -2rem;
+  margin-top: -2rem;
+  margin-bottom: 1.5rem;
+}
+
+.field-label {
+  font-family: var(--ui-font);
+  font-weight: 450;
+  font-size: 0.9rem;
+  line-height: 1;
+  color: #80848a;
+
+  margin-left: 0.3rem;
+}
+
+/* 입력 공통 래퍼 */
+.input-wrap {
+  position: relative;
+  background: #d9d9d9;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  width: 100%;
+  height: 2.7rem;
+  display: flex;
+  align-items: center;
+  padding: 0 0.9rem;
+  box-sizing: border-box;
+}
+
+.input-wrap.is-error {
+  border-color: #e55;
+}
+
+.hint-box {
+  min-height: 1.5rem; /* 항상 일정 공간 확보 */
+  margin-top: -0.4rem;
+  line-height: 1.1;
+}
+
+.hint-box1 {
+  min-height: 2.4rem; /* 항상 일정 공간 확보 */
+  margin-top: -0.4rem;
+  margin-bottom: 0.4rem;
+  line-height: 1.1;
+}
+
+.hint-error {
+  font-size: 0.7rem;
+  color: #d33;
+  line-height: 1.2;
+}
+
+/* ✅ 추가: 상태별 힌트 색상 */
+.hint-info {
+  font-size: 0.7rem;
+  color: #2563eb; /* 파랑 */
+  line-height: 1.2;
+}
+.hint-success {
+  font-size: 0.7rem;
+  color: #059669; /* 초록 */
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.text-input {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--ui-font);
+  font-weight: 400;
+  font-size: 0.8rem;
+  line-height: 1;
+  color: var(--text);
+}
+.text-input::placeholder {
+  color: #b0b6bd;
+}
+
+/* 닉네임: 입력 + 카운트 + 버튼 */
+.nick-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.count-badge {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--ui-font);
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: #8b9096;
+  background: #f1f3f5;
+  border-radius: 0.6rem;
+  padding: 0.35rem 0.5rem;
+}
+
+/* API 상태 힌트 */
+.api-hint {
+  margin: 0.35rem 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--ui-font);
+  font-size: 0.9rem;
+  color: #60656b;
+}
+.api-hint .api-msg {
+  opacity: 0.9;
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4.5rem;
+  height: 1.6rem;
+  padding: 0 0.5rem;
+  border-radius: 0.8rem;
+  border: 1px solid var(--line);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.status-badge.ok {
+  color: #0b7;
+  border-color: #aee;
+  background: #eafff7;
+}
+.status-badge.taken {
+  color: #e33;
+  border-color: #f4caca;
+  background: #fff1f1;
+}
+.status-badge.error {
+  color: #d70;
+  border-color: #f3d2a8;
+  background: #fff6e7;
+}
+.status-badge.checking {
+  color: #666;
+  background: #f5f7fa;
+}
+
+/* 중복확인 버튼 */
+.pill-btn {
+  height: 2.7rem;
+  padding: 0 1rem;
+  margin-right: -0.1rem;
+  border-radius: var(--radius-pill);
+  background: #ff69c3;
+  font-family: var(--ui-font);
+  font-weight: 600;
+  font-size: 0.8rem;
+  line-height: 1;
+  color: #fff;
+  border: 2px solid #ff69c3;
+
+  cursor: pointer;
+}
+.pill-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #fff;
+  color: #7d7d7d;
+  border: 1.5px solid black;
+}
+
+/* 닉네임 줄 우측에 뜨는 '확인 완료' */
+.dup-done {
+  align-self: center;
+  font-family: var(--ui-font);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #0a6;
+  white-space: nowrap;
+  margin-left: 0.25rem;
+}
+
+/* 3열 그리드 */
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.6rem;
+
+  margin: 2.5rem 0 2.5rem 0;
+}
+
+.mbti {
+  display: flex;
+
+  border: 2px solid black;
+}
+
+/* select 공통 */
+.select-input {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  appearance: none;
+  font-family: var(--ui-font);
+  font-weight: 400;
+  font-size: 0.9rem;
+  line-height: 1;
+  color: var(--text);
+}
+
+#gender.select-input {
+  cursor: pointer;
+}
+
+/* 학번 suffix */
+.input-wrap.has-suffix {
+  padding-right: 3.2rem;
+}
+.suffix {
+  position: absolute;
+  right: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--ui-font);
+  font-weight: 450;
+  font-size: 0.9rem;
+  line-height: 1;
+  color: #737a83;
+  pointer-events: none;
+}
+
+/* placeholder 색 */
+.field select:invalid {
+  color: #b0b6bd;
+}
+
+.notice {
+  margin: 30vh 0 0;
+  padding-left: 1rem;
+  color: #6f7680;
+  font-family: var(--ui-font);
+  font-weight: 400;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.notice li {
+  list-style: disc;
+}
+
+/* 제출 버튼 */
+.primary-btn {
+  width: 100%;
+  height: 3.25rem;
+  margin-top: 20%;
+  border-radius: 2rem;
+  border: 1.5px solid var(--btn-disabled-border);
+  background: #fff;
+  color: #9aa0a6;
+  font-family: var(--ui-font);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+
+  cursor: pointer;
+}
+.primary-btn:not(:disabled) {
+  border-color: transparent;
+  background: linear-gradient(90deg, #ff69c3 0%, #e8048d 100%);
+  color: #1a1a1a;
+  box-shadow: 0 0.7rem 1.2rem rgba(0, 0, 0, 0.08);
+}
+.primary-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* ===== 클릭형 입력(학과 선택) ===== */
+.input-clickable {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  gap: 0.5rem;
+  user-select: none;
+}
+.input-clickable .as-text {
+  display: inline-block;
+  width: auto;
+  height: auto;
+  line-height: 1;
+}
+.input-clickable.placeholder .as-text {
+  color: #b0b6bd;
+}
+.input-clickable .chev {
+  margin-left: auto;
+  color: #8b9096;
+  font-size: 1rem;
+}
+.input-clickable:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ===== 바텀시트 ===== */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(1px);
+  z-index: 999;
+  animation: fadeIn 0.15s ease;
+}
+.sheet-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.2s ease;
+  max-height: var(--sheet-height);
+}
+.sheet-header {
+  /* 헤더 높이를 고정해줘야 본문 높이 계산이 정확함 */
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--ui-font);
+}
+.sheet-header strong {
+  font-size: 1rem;
+  color: var(--text);
+}
+.sheet-close {
+  border: 0;
+  background: transparent;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+}
+.sheet-body {
+  overflow: auto;
+  padding: 0.5rem 0.75rem;
+  /* 시트 전체 높이 - 헤더 높이 - 하단 안전영역 여백 */
+  max-height: calc(var(--sheet-height) - 56px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+}
+.sheet-footer {
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid var(--line);
+}
+.sheet-cancel {
+  width: 100%;
+  height: 2.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-family: var(--ui-font);
+  font-weight: 700;
+  color: #444;
+  cursor: pointer;
+}
+
+/* ===== 아코디언 (학부/학과) ===== */
+.acc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.acc-item + .acc-item {
+  margin-top: 0.25rem;
+}
+
+.acc-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-family: var(--ui-font);
+  font-weight: 700;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.acc-header:hover {
+  background: #fafafa;
+}
+.acc-header.is-open {
+  border-color: var(--primary);
+  background: rgba(255, 105, 195, 0.07);
+}
+
+.caret {
+  width: 0;
+  height: 0;
+  border-top: 0.35rem solid transparent;
+  border-bottom: 0.35rem solid transparent;
+  border-left: 0.55rem solid #666;
+  transition: transform 0.18s ease;
+}
+.acc-header.is-open .caret {
+  transform: rotate(90deg);
+}
+
+.acc-body {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.25s ease;
+}
+.acc-body.open {
+  max-height: 600px; /* 충분히 큰 값 (학과 개수에 맞게 조정 가능) */
+}
+
+.program-list {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0 0.25rem 0.25rem;
+}
+
+.program-item {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 0.85rem;
+  margin: 0.28rem 0;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-family: var(--ui-font);
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.program-item:hover {
+  background: #fafafa;
+}
+.program-item.is-selected {
+  border-color: var(--primary);
+  background: rgba(255, 105, 195, 0.08);
+}
+.program-item .check {
+  margin-left: 0.75rem;
+}
+
+/* 애니메이션 */
+@keyframes slideUp {
+  from {
+    transform: translateY(8%);
+    opacity: 0.9;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 작은 화면 보정 */
+@media (max-width: 380px) {
+  .grid-3 {
+    grid-template-columns: 1fr 1fr;
+    margin: 1.5rem 0 1.5rem 0;
+  }
+  .grid-3 .field:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .primary-btn {
+    margin-top: 7vh;
+  }
+}
+
+/* 프론트에서 연동 확인 배너 css */
+/* 제출 결과 배너 */
+.submit-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  margin: 0.5rem 0 1rem;
+  font-family: var(--ui-font);
+  border: 1px solid var(--line);
+  background: #fff;
+}
+.submit-hint.ok {
+  border-color: #aee;
+  background: #eafff7;
+  color: #0a6;
+}
+.submit-hint.error {
+  border-color: #f4caca;
+  background: #fff1f1;
+  color: #d33;
+}
+.submit-hint.progress {
+  border-color: #d7dbe0;
+  background: #f7f9fc;
+  color: #555;
+}
+.submit-hint .msg {
+  opacity: 0.9;
+}
+
+/* ===== MBTI slider layout ===== */
+.mbti-slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 8px;
+}
+.mbti-row {
+  display: grid;
+  grid-template-columns: 24px 1fr 24px;
+  align-items: center;
+  gap: 12px;
+}
+
+.mbti-end {
+  font-weight: 700;
+  color: #666;
+  text-align: center;
+  width: 24px;
+}
+.mbti-end.is-picked {
+  color: #e53935; /* 선택된 알파벳 빨간색 */
+}
+
+/* range 기본트랙을 "회색 바", thumb을 "핑크 원"으로 */
+.mbti-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 999px;
+  background: #e5e5e5; /* 회색 바 */
+  outline: none;
+  width: 100%;
+  position: relative;
+}
+.mbti-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ff69c3; /* 핑크색 원 */
+  border: 0;
+  position: relative;
+  top: -2px; /* 바 중앙에 thumb 배치 */
+}
+.mbti-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ff5aa5;
+  border: 0;
+}
+
+/* 확인 버튼 */
+.mbti-confirm {
+  margin-top: 22px;
+  width: 100%;
+  height: 44px;
+  border-radius: 999px;
+  border: 0;
+  font-weight: 700;
+  color: #fff;
+  background: #ff5aa5; /* 기본 핑크 */
+  opacity: 0.4;
+}
+.mbti-confirm.is-enabled {
+  opacity: 1;
+}
+.mbti-confirm.is-disabled {
+  pointer-events: none;
+}
+
+/* iOS/안드 포함: 모바일 폭에서만 입력 컨트롤 16px 고정 */
+@media (max-width: 480px) {
+  /* 범위를 폼 루트로 한정하면 다른 페이지에 영향 X */
+  .profile-root input,
+  .profile-root select,
+  .profile-root textarea,
+  .profile-root .text-input,
+  .profile-root .select-input {
+    font-size: 16px !important; /* 확대 방지 핵심 */
+    line-height: 1.2; /* 커서 높이/줄간 보정 */
+  }
+
+  /* 플레이스홀더도 같이 맞추면 깔끔 */
+  .profile-root input::placeholder,
+  .profile-root .text-input::placeholder {
+    font-size: 16px;
+  }
+}
