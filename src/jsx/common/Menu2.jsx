@@ -5,6 +5,8 @@ import {
   AiOutlineHome,
   AiFillHeart,
   AiOutlineHeart,
+  AiFillTrophy,
+  AiOutlineTrophy,
 } from "react-icons/ai";
 import { BsChatDotsFill, BsChatDots } from "react-icons/bs";
 import { CgProfile } from "react-icons/cg";
@@ -13,6 +15,7 @@ import "../../css/common/Menu2.css";
 export default function Menu2() {
   return (
     <nav className="menu2">
+      {/* 홈 */}
       <NavLink
         to="/"
         end
@@ -32,6 +35,26 @@ export default function Menu2() {
         )}
       </NavLink>
 
+      {/* ✅ 랭킹 추가 */}
+      <NavLink
+        to="/ranking"
+        className={({ isActive }) =>
+          `menu2-item ${isActive ? "active-indicator" : ""}`
+        }
+      >
+        {({ isActive }) => (
+          <>
+            {isActive ? (
+              <AiFillTrophy className="menu2-icon active" />
+            ) : (
+              <AiOutlineTrophy className="menu2-icon" />
+            )}
+            <span className={isActive ? "active" : ""}>랭킹</span>
+          </>
+        )}
+      </NavLink>
+
+      {/* 매칭 */}
       <NavLink
         to="/matching"
         className={({ isActive }) =>
@@ -50,6 +73,7 @@ export default function Menu2() {
         )}
       </NavLink>
 
+      {/* 채팅창 */}
       <NavLink
         to="/chat"
         className={({ isActive }) =>
@@ -68,6 +92,7 @@ export default function Menu2() {
         )}
       </NavLink>
 
+      {/* 마이페이지 */}
       <NavLink
         to="/mypage"
         className={({ isActive }) =>
