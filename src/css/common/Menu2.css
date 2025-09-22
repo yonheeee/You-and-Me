@@ -131,3 +131,15 @@
 .menu2 .menu2-item .menu2-icon {
   touch-action: manipulation;
 }
+
+.menu2 .menu2-item { position: relative; }
+.menu2-dot {
+  position: absolute;
+  top: .2rem;
+  right: .9rem;
+  width: .5rem;
+  height: .5rem;
+  border-radius: 9999px;
+  background: #ff5a91;
+  box-shadow: 0 0 0 2px #fff;
+}

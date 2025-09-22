@@ -1,0 +1,33 @@
+/* src/css/common/ToastCenter.css */
+.toast-center {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0) + 84px);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  z-index: 10000;
+  pointer-events: none;
+  padding: .5rem;
+}
+.toast {
+  pointer-events: auto;
+  min-width: 16rem;
+  max-width: 92vw;
+  background: rgba(0,0,0,.84);
+  color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.3);
+  padding: .8rem 1rem;
+  backdrop-filter: blur(8px);
+  animation: toast-pop .2s ease-out;
+}
+.toast .toast-title { font-weight: 700; font-size: .95rem; line-height: 1.2; }
+.toast .toast-body { font-size: .85rem; opacity: .9; margin-top: .25rem; }
+.toast.signal { border: 1px solid rgba(255,90,145,.55); }
+.toast.match { border: 1px solid rgba(76,175,80,.6); }
+@keyframes toast-pop {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

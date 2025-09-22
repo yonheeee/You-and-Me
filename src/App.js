@@ -1,5 +1,11 @@
 // src/App.jsx
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import AppRouter from "./Router";
 import { willExpireSoon, refreshAccessToken } from "./api/axios";
 import useUserStore from "./api/userStore.js";
@@ -7,6 +13,11 @@ import { auth } from "./libs/firebase";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import Loader from "./jsx/common/Loader.jsx";
 import { Client as StompClient } from "@stomp/stompjs";
+
+/** 🔔 알림 시스템 추가 */
+import ToastCenter from "./jsx/common/ToastCenter.jsx";
+import useRealtimeNotifications from "./hooks/useRealtimeNotifications.js";
+import useNotifyStore from "./api/notifyStore";
 
 /** STOMP 구독 대상: 컴포넌트 외부에 둬서 재생성 방지 */
 const DEST = {
@@ -116,7 +127,9 @@ export default function App() {
           client.subscribe(DEST.signals, (msg) => {
             try {
               const payload = JSON.parse(msg.body);
-              window.dispatchEvent(new CustomEvent("rt:signal", { detail: payload }));
+              window.dispatchEvent(
+                new CustomEvent("rt:signal", { detail: payload })
+              );
             } catch (e) {
               console.warn("signals payload parse error:", e);
             }
@@ -125,14 +138,20 @@ export default function App() {
           client.subscribe(DEST.matches, (msg) => {
             try {
               const payload = JSON.parse(msg.body);
-              window.dispatchEvent(new CustomEvent("rt:match", { detail: payload }));
+              window.dispatchEvent(
+                new CustomEvent("rt:match", { detail: payload })
+              );
             } catch (e) {
               console.warn("matches payload parse error:", e);
             }
           });
         },
         onStompError: (frame) => {
-          console.error("[STOMP] broker error", frame.headers["message"], frame.body);
+          console.error(
+            "[STOMP] broker error",
+            frame.headers["message"],
+            frame.body
+          );
         },
         onWebSocketError: (e) => {
           console.error("[STOMP] ws error", e);
@@ -181,6 +200,24 @@ export default function App() {
     };
   }, []);
 
+  /** ========= 🔔 실시간 알림 변환 & 네이티브 권한 ========= */
+  // 웹소켓 이벤트 → 토스트/뱃지로 변환
+  useRealtimeNotifications();
+
+  // 브라우저 네이티브 알림 권한(선택)
+  useEffect(() => {
+    if (!("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+      useNotifyStore.getState().enableNative();
+      return;
+    }
+    if (Notification.permission !== "denied") {
+      Notification.requestPermission().then((res) => {
+        if (res === "granted") useNotifyStore.getState().enableNative();
+      });
+    }
+  }, []);
+
   if (!isInitialized || !authReady) {
     return (
       <div
@@ -199,6 +236,8 @@ export default function App() {
   return (
     <div className="App">
       <AppRouter />
+      {/* 🔔 토스트 렌더 */}
+      <ToastCenter />
     </div>
   );
 }

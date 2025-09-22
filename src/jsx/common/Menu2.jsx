@@ -13,19 +13,27 @@ import { BsChatDotsFill, BsChatDots } from "react-icons/bs";
 import { CgProfile } from "react-icons/cg";
 import "../../css/common/Menu2.css";
 
-// 🔥 Firestore 구독
+// 🔥 Firestore 구독 (채팅 미읽음)
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../../libs/firebase";
 import useUserStore from "../../api/userStore";
+
+// 🔔 실시간 플러팅/매칭 미읽음 (notifyStore)
+import useNotifyStore from "../../api/notifyStore";
 
 export default function Menu2() {
   const { user } = useUserStore();
   const myIdNum = Number(user?.userId);
   const myIdStr = Number.isFinite(myIdNum) ? String(myIdNum) : "";
 
-  const [hasUnread, setHasUnread] = useState(false);
-  // (원하면 합계 배지 숫자로도 쓸 수 있음)
-  // const [totalUnread, setTotalUnread] = useState(0);
+  // 채팅 미읽음(파이어스토어)
+  const [hasUnreadChat, setHasUnreadChat] = useState(false);
+  // const [totalUnreadChat, setTotalUnreadChat] = useState(0); // 필요시 숫자 뱃지
+
+  // 플러팅/매칭 미읽음(notifyStore)
+  const unread = useNotifyStore((s) => s.unread);
+  const hasSignal = (unread.signal ?? 0) + (unread.match ?? 0) > 0;
+  // const totalSignal = (unread.signal ?? 0) + (unread.match ?? 0); // 필요시 숫자 뱃지
 
   useEffect(() => {
     if (!Number.isFinite(myIdNum)) return;
@@ -43,8 +51,8 @@ export default function Menu2() {
         if (count > 0) any = true;
         // sum += Number(count) || 0;
       });
-      setHasUnread(any);
-      // setTotalUnread(sum);
+      setHasUnreadChat(any);
+      // setTotalUnreadChat(sum);
     });
     return () => unsub();
   }, [myIdNum, myIdStr]);
@@ -90,7 +98,7 @@ export default function Menu2() {
         )}
       </NavLink>
 
-      {/* 매칭 */}
+      {/* 매칭 (🔴 플러팅/매칭 알림 뱃지) */}
       <NavLink
         to="/matching"
         className={({ isActive }) =>
@@ -99,17 +107,28 @@ export default function Menu2() {
       >
         {({ isActive }) => (
           <>
-            {isActive ? (
-              <AiFillHeart className="menu2-icon active" />
-            ) : (
-              <AiOutlineHeart className="menu2-icon" />
-            )}
+            <span className="menu2-icon-wrap">
+              {isActive ? (
+                <AiFillHeart className="menu2-icon active" />
+              ) : (
+                <AiOutlineHeart className="menu2-icon" />
+              )}
+              {hasSignal && (
+                <span className="menu2-badge" aria-label="새 알림" />
+              )}
+              {/* 숫자 배지로 쓰고 싶으면 위 줄 대신 ↓
+              {totalSignal > 0 && (
+                <span className="menu2-badge-count">
+                  {totalSignal > 99 ? "99+" : totalSignal}
+                </span>
+              )} */}
+            </span>
             <span className={isActive ? "active" : ""}>매칭</span>
           </>
         )}
       </NavLink>
 
-      {/* 채팅창 (🔴 빨간 점 배지) */}
+      {/* 채팅창 (🔴 채팅 미읽음 배지) */}
       <NavLink
         to="/chat"
         className={({ isActive }) =>
@@ -124,11 +143,13 @@ export default function Menu2() {
               ) : (
                 <BsChatDots className="menu2-icon" />
               )}
-              {hasUnread && <span className="menu2-badge" aria-label="새 메세지" />}
+              {hasUnreadChat && (
+                <span className="menu2-badge" aria-label="새 메세지" />
+              )}
               {/* 숫자 배지로 쓰고 싶으면 위 줄 대신 ↓
-              {totalUnread > 0 && (
+              {totalUnreadChat > 0 && (
                 <span className="menu2-badge-count">
-                  {totalUnread > 99 ? "99+" : totalUnread}
+                  {totalUnreadChat > 99 ? "99+" : totalUnreadChat}
                 </span>
               )} */}
             </span>

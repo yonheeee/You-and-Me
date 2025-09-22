@@ -8,13 +8,20 @@ import Modal from "../common/Modal";
 import YouProfile from "../mypage/YouProfile";
 import api from "../../api/axios.js";
 
+// 🔔 실시간 알림(미읽음 카운트/읽음 처리)
+import useNotifyStore from "../../api/notifyStore";
+
 export default function FlirtingTabs() {
   const [activeTab, setActiveTab] = useState("sent");
   const [sentSignals, setSentSignals] = useState([]);
   const [receivedSignals, setReceivedSignals] = useState([]);
-  const [openModal, setOpenModal] = useState(false);
+  const [openModal, setOpenModal] = useState(false); // false | signalObj
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [openProfile, setOpenProfile] = useState(false);
+
+  // unread 뱃지 + 읽음 처리 함수
+  const unread = useNotifyStore((s) => s.unread);
+  const markRead = useNotifyStore((s) => s.markRead);
 
   const fetchSentSignals = useCallback(async () => {
     try {
@@ -34,11 +41,20 @@ export default function FlirtingTabs() {
     }
   }, []);
 
+  // 최초 로드
   useEffect(() => {
     fetchSentSignals();
     fetchReceivedSignals();
   }, [fetchSentSignals, fetchReceivedSignals]);
 
+  // 화면 진입/탭 전환 시 읽음 처리
+  useEffect(() => {
+    // 이 화면에서는 플러팅/매칭 두 종류 모두 소비된다고 가정
+    markRead("signal");
+    markRead("match");
+  }, [activeTab, markRead]);
+
+  // 디바운스 리로드
   const reloadTimer = useRef(null);
   const scheduleReload = useCallback(() => {
     if (reloadTimer.current) clearTimeout(reloadTimer.current);
@@ -80,6 +96,13 @@ export default function FlirtingTabs() {
     };
   }, [scheduleReload]);
 
+  // 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (reloadTimer.current) clearTimeout(reloadTimer.current);
+    };
+  }, []);
+
   const acceptSignal = async (signalId) => {
     try {
       await api.post(`/signals/accept/${signalId}`);
@@ -105,6 +128,8 @@ export default function FlirtingTabs() {
     setOpenProfile(true);
   };
 
+  const unreadSignalCount = unread.signal ?? 0; // 받은 플러팅 기준
+
   return (
     <div className="flirting-tabs">
       <div className="tab-header">
@@ -119,6 +144,11 @@ export default function FlirtingTabs() {
           onClick={() => setActiveTab("received")}
         >
           나에게 온 플러팅
+          {unreadSignalCount > 0 && (
+            <span className="badge">
+              {unreadSignalCount > 99 ? "99+" : unreadSignalCount}
+            </span>
+          )}
         </button>
       </div>
 
