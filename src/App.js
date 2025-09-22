@@ -1,13 +1,11 @@
 // src/App.jsx
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import AppRouter from "./Router";
 import { willExpireSoon, refreshAccessToken } from "./api/axios";
 import useUserStore from "./api/userStore.js";
 import { auth } from "./libs/firebase";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import Loader from "./jsx/common/Loader.jsx";
-import { Client as StompClient } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
 
 /** 🔔 알림 시스템 */
 import ToastCenter from "./jsx/common/ToastCenter.jsx";
@@ -15,15 +13,8 @@ import useRealtimeNotifications from "./hooks/useRealtimeNotifications.js";
 import useNotifyStore from "./api/notifyStore";
 import AppWsBridge from "./AppWsBridge.jsx";
 
-/** STOMP 구독 대상: 컴포넌트 외부에 둬서 재생성 방지 */
-const DEST = {
-  signals: "/user/queue/signals",
-  matches: "/user/queue/matches",
-};
-
 export default function App() {
   const { isInitialized, setInitialized } = useUserStore();
-  const user = useUserStore((s) => s.user);
   const [authReady, setAuthReady] = useState(false);
 
   /** ========= Firebase 익명 인증 준비 ========= */
@@ -44,9 +35,13 @@ export default function App() {
   useEffect(() => {
     const bootstrap = async () => {
       try {
-        const access = useUserStore.getState().user?.accessToken;
-        if (access && willExpireSoon(access, 90)) await refreshAccessToken().catch(() => {});
-        if (!access) await refreshAccessToken().catch(() => {});
+        const access = useUserStore.getState().user?.jwt; // ✅ AppWsBridge와 통일
+        if (access && willExpireSoon(access, 90)) {
+          await refreshAccessToken().catch(() => {});
+        }
+        if (!access) {
+          await refreshAccessToken().catch(() => {});
+        }
       } catch (e) {
         console.error("초기 부팅 중 오류:", e);
       } finally {
@@ -56,129 +51,9 @@ export default function App() {
     bootstrap();
   }, [setInitialized]);
 
-  /** ========= STOMP ========= */
-  const stompRef = useRef(null);
-  const reconnectTimer = useRef(null);
-  const connectStompRef = useRef(null);
-
-  // API/WS URL 계산: 메모이즈로 고정
-  const API_BASE_URL = useMemo(() => {
-    const fromVite =
-      typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL;
-    const fromCRA = process.env.REACT_APP_API_URL;
-    return (fromVite || fromCRA || "http://localhost:4000/api").trim();
-  }, []);
-  const WS_URL = useMemo(() => API_BASE_URL.replace(/\/+$/, "") + "/ws", [API_BASE_URL]);
-
-  /** STOMP 연결 함수: SockJS 사용 */
-  const connectStomp = useCallback(
-    (token) => {
-      if (!token) return;
-
-      // 예정된 재연결 제거
-      if (reconnectTimer.current) {
-        clearTimeout(reconnectTimer.current);
-        reconnectTimer.current = null;
-      }
-      // 기존 클라이언트 정리
-      if (stompRef.current) {
-        try {
-          stompRef.current.deactivate();
-        } catch {}
-        stompRef.current = null;
-      }
-
-      const client = new StompClient({
-        // SockJS는 http(s) URL 사용
-        webSocketFactory: () =>
-          new SockJS(WS_URL, null, {
-            transports: ["websocket", "xhr-streaming", "xhr-polling"],
-          }),
-        connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
-        debug:
-          process.env.NODE_ENV === "development"
-            ? (str) => console.log("[STOMP] ", str)
-            : undefined,
-        reconnectDelay: 0, // 재연결은 우리가 타이머로 관리
-        heartbeatIncoming: 10000,
-        heartbeatOutgoing: 10000,
-
-        onConnect: () => {
-          console.log("[STOMP] connected");
-
-          client.subscribe(DEST.signals, (msg) => {
-            try {
-              const payload = JSON.parse(msg.body);
-              window.dispatchEvent(new CustomEvent("rt:signal", { detail: payload }));
-            } catch (e) {
-              console.warn("signals payload parse error:", e);
-            }
-          });
-
-          client.subscribe(DEST.matches, (msg) => {
-            try {
-              const payload = JSON.parse(msg.body);
-              window.dispatchEvent(new CustomEvent("rt:match", { detail: payload }));
-            } catch (e) {
-              console.warn("matches payload parse error:", e);
-            }
-          });
-        },
-
-        onStompError: (frame) => {
-          console.error("[STOMP] broker error", frame.headers["message"], frame.body);
-        },
-        onWebSocketError: (e) => {
-          console.error("[STOMP] ws error", e);
-        },
-        onWebSocketClose: () => {
-          console.warn("[STOMP] closed, will try reconnect in 3s");
-          if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
-          reconnectTimer.current = setTimeout(() => {
-            const fresh = useUserStore.getState().user?.accessToken;
-            connectStompRef.current?.(fresh);
-          }, 3000);
-        },
-      });
-
-      stompRef.current = client;
-      client.activate();
-    },
-    [WS_URL]
-  );
-
-  // 최신 connectStomp를 ref에 유지 (재연결 타이머에서 사용)
-  useEffect(() => {
-    connectStompRef.current = connectStomp;
-  }, [connectStomp]);
-
-  // 토큰 변경 시 연결/재연결
-  useEffect(() => {
-    const token = user?.accessToken;
-    if (token) connectStomp(token);
-    return () => {
-      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
-    };
-  }, [user?.accessToken, connectStomp]);
-
-  // 언마운트 정리
-  useEffect(() => {
-    return () => {
-      if (stompRef.current) {
-        try {
-          stompRef.current.deactivate();
-        } catch {}
-        stompRef.current = null;
-      }
-      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
-    };
-  }, []);
-
   /** ========= 🔔 실시간 알림 변환 & 네이티브 권한 ========= */
-  // 웹소켓 이벤트 → 토스트/뱃지로 변환
   useRealtimeNotifications();
 
-  // 브라우저 네이티브 알림 권한(선택)
   useEffect(() => {
     if (!("Notification" in window)) return;
     if (Notification.permission === "granted") {
@@ -209,9 +84,9 @@ export default function App() {
 
   return (
     <div className="App">
+      {/* ✅ STOMP 연결은 AppWsBridge 단일 진입 */}
       <AppWsBridge />
       <AppRouter />
-      {/* 🔔 토스트 렌더 */}
       <ToastCenter />
     </div>
   );
