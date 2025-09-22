@@ -1,5 +1,5 @@
 // src/jsx/home/FlirtingTabs.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import "../../css/home/FlirtingTabs.css";
 import SentSignalList from "./SentSignalList";
 import ReceiveSignal from "./ReceiveSignal";
@@ -16,33 +16,75 @@ export default function FlirtingTabs() {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [openProfile, setOpenProfile] = useState(false);
 
-  useEffect(() => {
-    fetchSentSignals();
-    fetchReceivedSignals();
-  }, []);
-
-  const fetchSentSignals = async () => {
+  const fetchSentSignals = useCallback(async () => {
     try {
       const resp = await api.get("/signals/sent");
       setSentSignals(resp.data || []);
     } catch (err) {
       console.error("❌ 보낸 신호 불러오기 실패:", err);
     }
-  };
+  }, []);
 
-  const fetchReceivedSignals = async () => {
+  const fetchReceivedSignals = useCallback(async () => {
     try {
       const resp = await api.get("/signals/received");
       setReceivedSignals(resp.data || []);
     } catch (err) {
       console.error("❌ 받은 신호 불러오기 실패:", err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchSentSignals();
+    fetchReceivedSignals();
+  }, [fetchSentSignals, fetchReceivedSignals]);
+
+  const reloadTimer = useRef(null);
+  const scheduleReload = useCallback(() => {
+    if (reloadTimer.current) clearTimeout(reloadTimer.current);
+    reloadTimer.current = setTimeout(() => {
+      fetchSentSignals();
+      fetchReceivedSignals();
+    }, 250);
+  }, [fetchSentSignals, fetchReceivedSignals]);
+
+  useEffect(() => {
+    const onSignal = (e) => {
+      const p = e.detail;
+      if (p?.type === "DECLINED" && p?.signalId) {
+        setSentSignals((prev) =>
+          prev.map((row) =>
+            row.signalId === p.signalId
+              ? {
+                  ...row,
+                  status: "DECLINED",
+                  message: p.message ?? "거절하셨습니다.",
+                  toUser: { ...(row.toUser || {}), ...(p.toUser || {}) },
+                }
+              : row
+          )
+        );
+      }
+      scheduleReload();
+    };
+
+    const onMatch = () => {
+      scheduleReload();
+    };
+
+    window.addEventListener("rt:signal", onSignal);
+    window.addEventListener("rt:match", onMatch);
+    return () => {
+      window.removeEventListener("rt:signal", onSignal);
+      window.removeEventListener("rt:match", onMatch);
+    };
+  }, [scheduleReload]);
 
   const acceptSignal = async (signalId) => {
     try {
       await api.post(`/signals/accept/${signalId}`);
       fetchReceivedSignals();
+      fetchSentSignals();
       setOpenModal(false);
     } catch (err) {
       console.error("❌ 신호 수락 실패:", err);
@@ -58,7 +100,6 @@ export default function FlirtingTabs() {
     }
   };
 
-  // ✅ 공통 프로필 열기 함수
   const handleOpenProfile = (userId) => {
     setSelectedUserId(userId);
     setOpenProfile(true);
@@ -66,7 +107,6 @@ export default function FlirtingTabs() {
 
   return (
     <div className="flirting-tabs">
-      {/* 상단 탭 */}
       <div className="tab-header">
         <button
           className={`tab-btn ${activeTab === "sent" ? "active" : ""}`}
@@ -82,10 +122,12 @@ export default function FlirtingTabs() {
         </button>
       </div>
 
-      {/* 컨텐츠 */}
       <div className={`tab-content ${activeTab}-tab`}>
         {activeTab === "sent" ? (
-          <SentSignalList signals={sentSignals} onOpenProfile={handleOpenProfile} />
+          <SentSignalList
+            signals={sentSignals}
+            onOpenProfile={handleOpenProfile}
+          />
         ) : (
           <ReceiveSignal
             signals={receivedSignals}
@@ -98,7 +140,6 @@ export default function FlirtingTabs() {
         )}
       </div>
 
-      {/* 수락 모달 */}
       {openModal && (
         <Accept
           open={true}
@@ -114,7 +155,6 @@ export default function FlirtingTabs() {
         />
       )}
 
-      {/* 프로필 모달 */}
       {openProfile && (
         <Modal onClose={() => setOpenProfile(false)}>
           <YouProfile userId={selectedUserId} />
