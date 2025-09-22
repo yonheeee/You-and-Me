@@ -14,7 +14,7 @@ import PopUp from "../home/PopUp";
 import { signInWithCustomToken } from "firebase/auth";
 import { auth } from "../../libs/firebase";
 
-const RAW_BASE = (process.env.REACT_APP_API_URL || "").trim();
+const RAW_BASE = (process.env.REACT_APP_API_BASE_URL || "").trim();
 const IS_ABS = /^https?:\/\//i.test(RAW_BASE);
 const API_BASE = (IS_ABS ? RAW_BASE : "http://1.201.17.231").replace(
   /\/+$/,
