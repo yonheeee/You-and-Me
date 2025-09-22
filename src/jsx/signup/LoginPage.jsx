@@ -15,12 +15,7 @@ import { signInWithCustomToken } from "firebase/auth";
 import { auth } from "../../libs/firebase";
 
 const RAW_BASE = (process.env.REACT_APP_API_BASE_URL || "").trim();
-const IS_ABS = /^https?:\/\//i.test(RAW_BASE);
-const API_BASE = (IS_ABS ? RAW_BASE : "http://1.201.17.231").replace(
-  /\/+$/,
-  ""
-);
-
+const API_BASE = RAW_BASE.replace(/\/+$/, ""); // 뒤 슬래시 정리
 const KAKAO_LOGIN_PATH = "/auth/kakao/login";
 const ME_URL = `${API_BASE}/auth/me`;
 
@@ -207,28 +202,28 @@ export default function LoginOrGate() {
           </button>
         </div>
         {/* Q&A 버튼 */}
-        </section>
-        <section className="QandA">
-          <button
-            className="QandA-btn"
-            onClick={() => setIsPopupOpen(true)}
-            type="button"
-          >
-            <div className="QandA-text">
-              <div
-                className="Q-title"
-                style={{ fontSize: "20px", fontWeight: "bold" }}
-              >
-                FAQ
-              </div>
-              <div className="Q-subtitle" style={{ fontSize: "14px" }}>
-                자주 묻는 질문 및 개인정보 처리방침
-              </div>
+      </section>
+      <section className="QandA">
+        <button
+          className="QandA-btn"
+          onClick={() => setIsPopupOpen(true)}
+          type="button"
+        >
+          <div className="QandA-text">
+            <div
+              className="Q-title"
+              style={{ fontSize: "20px", fontWeight: "bold" }}
+            >
+              FAQ
             </div>
-            <img src={QandA} alt="큐엔에이 이미지" />
-          </button>
-        </section>
-        <PopUp open={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+            <div className="Q-subtitle" style={{ fontSize: "14px" }}>
+              자주 묻는 질문 및 개인정보 처리방침
+            </div>
+          </div>
+          <img src={QandA} alt="큐엔에이 이미지" />
+        </button>
+      </section>
+      <PopUp open={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
     </main>
   );
 }
