@@ -1,15 +1,27 @@
 /* src/css/common/Menu2.css */
 
+/* (선택) 색상 변수 */
+:root {
+  --menu-bg: #fff;
+  --menu-border: #eee;
+  --menu-active: #E8048D;
+  --menu-text: #ACACAC;
+  --menu-icon: #8f8f8f;
+}
+
 .menu2 {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
+
   display: flex;
   align-items: center;
-  background: #fff;
-  border-top: 1px solid #eee;
-  padding: 0.4rem 0;
+
+  background: var(--menu-bg);
+  border-top: 1px solid var(--menu-border);
+  padding: 0.4rem 0 calc(0.4rem + env(safe-area-inset-bottom));
+
   z-index: 100;
 }
 
@@ -19,29 +31,31 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
   text-decoration: none;
-  color: #ACACAC;
+  color: var(--menu-text);
   font-size: 0.75rem;
+
   position: relative; /* indicator 위치 기준 */
 }
 
 .menu2-icon {
   font-size: 1.6rem; /* 아이콘 크기 */
   margin-bottom: 0.2rem;
-  color: #8f8f8f;
+  color: var(--menu-icon);
   transition: color 0.25s ease, transform 0.25s ease;
 }
 
 .menu2-item span {
   font-size: 0.75rem;
-  color: #ACACAC;
+  color: var(--menu-text);
   transition: color 0.25s ease;
 }
 
 /* 활성화 효과 */
 .menu2-icon.active,
 .menu2-item span.active {
-  color: #E8048D; /* 활성화 색상 */
+  color: var(--menu-active); /* 활성화 색상 */
   font-weight: 600;
 }
 
@@ -57,7 +71,7 @@
   height: 0.4rem;
   margin-top: 0.2rem;
   border-radius: 50%;
-  background-color: #E8048D;
+  background-color: var(--menu-active);
   animation: bubble 0.3s ease;
 }
 
@@ -69,5 +83,70 @@
   to {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+/* ===== 🔴 채팅 새 메세지 빨간 점 배지 ===== */
+/* JSX에서 아이콘을 <span class="menu2-icon-wrap">로 감싸주세요. */
+.menu2 .menu2-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* 동그란 빨간 점 (카톡 스타일) */
+.menu2 .menu2-badge {
+  position: absolute;
+  top: -2px;    /* 아이콘 우상단 살짝 바깥 */
+  right: -2px;
+  width: 9px;
+  height: 9px;
+  background: #ff3b30; /* iOS 레드 톤 */
+  border-radius: 50%;
+  /* 네비 배경과의 경계 확보 */
+  box-shadow: 0 0 0 2px var(--menu-bg);
+}
+
+/* (선택) 숫자 배지로 쓰고 싶을 때 */
+.menu2 .menu2-badge-count {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #ff3b30;
+  color: #fff;
+  border-radius: 9px;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--menu-bg);
+}
+
+/* 터치 타깃 안정성(선택) */
+.menu2 .menu2-item .menu2-icon-wrap,
+.menu2 .menu2-item .menu2-icon {
+  touch-action: manipulation;
+}
+
+/* 다크모드 보정(선택) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --menu-bg: #111;
+    --menu-border: #222;
+    --menu-text: #b7b7b7;
+    --menu-icon: #c2c2c2;
+    --menu-active: #E8048D;
+  }
+  .menu2 {
+    background: var(--menu-bg);
+    border-top-color: var(--menu-border);
+  }
+  .menu2 .menu2-badge,
+  .menu2 .menu2-badge-count {
+    box-shadow: 0 0 0 2px var(--menu-bg);
   }
 }

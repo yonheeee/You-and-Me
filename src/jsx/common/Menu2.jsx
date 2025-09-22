@@ -1,4 +1,5 @@
 // src/components/common/Menu2.jsx
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   AiFillHome,
@@ -12,7 +13,42 @@ import { BsChatDotsFill, BsChatDots } from "react-icons/bs";
 import { CgProfile } from "react-icons/cg";
 import "../../css/common/Menu2.css";
 
+// 🔥 Firestore 구독
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "../../libs/firebase";
+import useUserStore from "../../api/userStore";
+
 export default function Menu2() {
+  const { user } = useUserStore();
+  const myIdNum = Number(user?.userId);
+  const myIdStr = Number.isFinite(myIdNum) ? String(myIdNum) : "";
+
+  const [hasUnread, setHasUnread] = useState(false);
+  // (원하면 합계 배지 숫자로도 쓸 수 있음)
+  // const [totalUnread, setTotalUnread] = useState(0);
+
+  useEffect(() => {
+    if (!Number.isFinite(myIdNum)) return;
+    // 내가 참여한 방 구독
+    const q = query(
+      collection(db, "chatRooms"),
+      where("participants", "array-contains", myIdNum)
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      let any = false;
+      // let sum = 0;
+      snap.forEach((doc) => {
+        const data = doc.data();
+        const count = data?.unread?.[myIdStr] ?? 0;
+        if (count > 0) any = true;
+        // sum += Number(count) || 0;
+      });
+      setHasUnread(any);
+      // setTotalUnread(sum);
+    });
+    return () => unsub();
+  }, [myIdNum, myIdStr]);
+
   return (
     <nav className="menu2">
       {/* 홈 */}
@@ -35,7 +71,7 @@ export default function Menu2() {
         )}
       </NavLink>
 
-      {/* ✅ 랭킹 추가 */}
+      {/* 랭킹 */}
       <NavLink
         to="/ranking"
         className={({ isActive }) =>
@@ -73,7 +109,7 @@ export default function Menu2() {
         )}
       </NavLink>
 
-      {/* 채팅창 */}
+      {/* 채팅창 (🔴 빨간 점 배지) */}
       <NavLink
         to="/chat"
         className={({ isActive }) =>
@@ -82,11 +118,20 @@ export default function Menu2() {
       >
         {({ isActive }) => (
           <>
-            {isActive ? (
-              <BsChatDotsFill className="menu2-icon active" />
-            ) : (
-              <BsChatDots className="menu2-icon" />
-            )}
+            <span className="menu2-icon-wrap">
+              {isActive ? (
+                <BsChatDotsFill className="menu2-icon active" />
+              ) : (
+                <BsChatDots className="menu2-icon" />
+              )}
+              {hasUnread && <span className="menu2-badge" aria-label="새 메세지" />}
+              {/* 숫자 배지로 쓰고 싶으면 위 줄 대신 ↓
+              {totalUnread > 0 && (
+                <span className="menu2-badge-count">
+                  {totalUnread > 99 ? "99+" : totalUnread}
+                </span>
+              )} */}
+            </span>
             <span className={isActive ? "active" : ""}>채팅창</span>
           </>
         )}
