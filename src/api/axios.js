@@ -5,7 +5,7 @@ import useUserStore from "./userStore.js";
 // --------------------------- 기본 설정 ---------------------------
 const API_BASE_URL =
   (typeof import.meta !== "undefined" && import.meta.env?.REACT_APP_API_BASE_URL) ||
-  process.env.REACT_APP_API_URL ||
+  process.env.REACT_APP_API_BASE_URL ||
   "http://localhost:4000/api";
 const API_HOST = new URL(API_BASE_URL).host;
 
