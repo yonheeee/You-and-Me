@@ -10,14 +10,14 @@ export default function AppWsBridge() {
   useEffect(() => {
     console.log("[WS] AppWsBridge effect 실행됨, user:", user);
 
-    if (!user?.jwt) {
-      console.warn("[WS] jwt 없음 → 연결 시도 안 함");
+    if (!user?.accessToken) {
+      console.warn("[WS] accessToken 없음 → 연결 시도 안 함");
       return;
     }
 
-    console.log("[WS] jwt 감지됨 → connect 실행:", user.jwt);
+    console.log("[WS] accessToken 감지됨 → connect 실행:", user.accessToken);
 
-    connect(user.jwt, {
+    connect(user.accessToken, {
       onSignal: (payload) => {
         console.log("📩 [WS] signal 수신:", payload);
         useWsStore.getState().pushSignal(payload);
@@ -32,7 +32,7 @@ export default function AppWsBridge() {
       console.log("[WS] AppWsBridge cleanup 실행 → disconnect 호출");
       disconnect();
     };
-  }, [user?.jwt]);
+  }, [user?.accessToken]);
 
   return null; // UI 없음, 브릿지 역할만
 }
