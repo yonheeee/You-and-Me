@@ -28,7 +28,7 @@ export default function ChatRoom() {
   const navigate = useNavigate();
   const { user } = useUserStore();
 
-  const { addDeletedRoom } = useChatStore(); // ✅ 삭제 방 id 기록
+  const { addDeletedRoom } = useChatStore(); // 삭제 방 id 기록
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -45,7 +45,14 @@ export default function ChatRoom() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const inputWrapperRef = useRef(null);
-  const composingRef = useRef(false); // ✅ 한글 IME 조합 상태
+  const composingRef = useRef(false); // 한글 IME 조합 상태
+
+  const refocusInput = useCallback(() => {
+    // 렌더/제출 타이밍 보정
+    setTimeout(() => {
+      inputRef.current?.focus({ preventScroll: true });
+    }, 0);
+  }, []);
 
   // Firebase Auth 준비
   useEffect(() => {
@@ -98,7 +105,7 @@ export default function ChatRoom() {
 
   const peerData = peerIdNum != null ? peersByUserId[peerIdNum] ?? null : null;
 
-  // ✅ 방 삭제 (나가기)
+  // 방 삭제 (나가기)
   async function handleLeaveRoom() {
     if (!roomId) return;
     const ok = window.confirm(
@@ -109,7 +116,7 @@ export default function ChatRoom() {
     try {
       const roomRef = doc(db, "chatRooms", roomId);
       await deleteDoc(roomRef);
-      addDeletedRoom(roomId); // ✅ persist에 기록
+      addDeletedRoom(roomId);
       navigate("/chat");
     } catch (err) {
       console.error("채팅방 삭제 실패:", err);
@@ -117,7 +124,7 @@ export default function ChatRoom() {
     }
   }
 
-  // === 스크롤/읽음 관련 유틸 ===
+  // === 스크롤/읽음 유틸 ===
   const isNearBottom = useCallback(() => {
     const el = messagesWrapRef.current;
     if (!el) return true;
@@ -137,7 +144,7 @@ export default function ChatRoom() {
     [isNearBottom]
   );
 
-  // ✅ 방 레벨 unread 카운터 0으로
+  // 방 레벨 unread 카운터 0
   const markRoomUnreadZero = useCallback(async (roomId, userIdStr) => {
     try {
       const roomRef = doc(db, "chatRooms", roomId);
@@ -147,7 +154,7 @@ export default function ChatRoom() {
     }
   }, []);
 
-  // ✅ 메시지 단위 읽음 처리 (내 userId를 readBy에 기록)
+  // 메시지 단위 읽음 처리 (내 userId를 readBy에 기록)
   const markAllAsRead = useCallback(
     async (roomId, userIdStr, list) => {
       if (!roomId || !userIdStr || !Array.isArray(list) || list.length === 0)
@@ -158,7 +165,7 @@ export default function ChatRoom() {
         let dirty = 0;
 
         for (const msg of list) {
-          if (msg?.readBy?.[userIdStr]) continue; // 이미 읽은 메시지는 스킵
+          if (msg?.readBy?.[userIdStr]) continue;
           const msgRef = doc(msgCol, msg.id);
           batch.update(msgRef, { [`readBy.${userIdStr}`]: true });
           dirty++;
@@ -175,7 +182,7 @@ export default function ChatRoom() {
     []
   );
 
-  // ✅ 조건 맞으면 읽음 처리 트리거
+  // 조건 맞으면 읽음 처리 트리거
   const maybeMarkAsRead = useCallback(
     (list) => {
       if (!roomId || !myIdStr || !Array.isArray(list) || list.length === 0)
@@ -253,12 +260,13 @@ export default function ChatRoom() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 메시지 전송
+  // 전송
   async function sendMessage() {
     const text = input.trim();
     if (!text) return;
     if (!Number.isFinite(myIdNum) || !roomId) return;
-    if (!Array.isArray(roomInfo?.participants) || roomInfo.participants.length < 2) return;
+    if (!Array.isArray(roomInfo?.participants) || roomInfo.participants.length < 2)
+      return;
 
     setSending(true);
     try {
@@ -276,7 +284,7 @@ export default function ChatRoom() {
         const newMsgRef = doc(msgColRef);
         const now = serverTimestamp();
 
-        // ✅ 메시지에 readBy 추가 (보낸 사람은 자동 읽음)
+        // 보낸 사람은 자동 읽음
         tx.set(newMsgRef, {
           text,
           senderId: myIdNum,
@@ -284,7 +292,6 @@ export default function ChatRoom() {
           readBy: { [String(myIdNum)]: true },
         });
 
-        // ✅ 방의 lastMessage + 상대 unread 증가
         tx.update(roomRef, {
           lastMessage: {
             text,
@@ -295,12 +302,8 @@ export default function ChatRoom() {
         });
       });
 
-      // ✅ 입력값 비우고, 키보드/포커스 유지
       setInput("");
-      requestAnimationFrame(() => {
-        inputRef.current?.focus({ preventScroll: true });
-      });
-
+      refocusInput(); // PC/모바일 모두 포커스 유지
       smartScrollToBottom(true);
     } catch (e) {
       console.error("sendMessage failed:", e);
@@ -309,13 +312,18 @@ export default function ChatRoom() {
     }
   }
 
-  function handleKeyDown(e) {
-    // ✅ 한글 조합 중이면 Enter 무시 (전송 방지)
-    if (composingRef.current) return;
+  // 폼 제출 (Enter → submit)
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!sending) sendMessage();
+    refocusInput();
+  }
 
-    if (e.key === "Enter" && !e.shiftKey) {
+  // IME 조합 중 Enter 방지
+  function handleKeyDown(e) {
+    if (e.key === "Enter" && composingRef.current) {
       e.preventDefault();
-      if (!sending) sendMessage();
+      e.stopPropagation();
     }
   }
 
@@ -373,7 +381,6 @@ export default function ChatRoom() {
           </span>
         )}
 
-        {/* ✅ 나가기 버튼 */}
         <button
           className="leave-btn"
           onClick={handleLeaveRoom}
@@ -429,25 +436,28 @@ export default function ChatRoom() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 입력창 */}
-      <div className="chatroom-input" ref={inputWrapperRef}>
+      {/* 입력창 (form + submit) */}
+      <form
+        className="chatroom-input"
+        ref={inputWrapperRef}
+        onSubmit={handleSubmit}
+      >
         <input
+          autoFocus
           ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          onCompositionStart={() => (composingRef.current = true)}  // ✅ IME 시작
-          onCompositionEnd={() => (composingRef.current = false)}    // ✅ IME 종료
+          onCompositionStart={() => (composingRef.current = true)}
+          onCompositionEnd={() => (composingRef.current = false)}
           placeholder="메세지를 입력해주세요."
-          // ❗ sending 때문에 disabled로 포커스 잃지 않도록
+          // sending 동안에도 disabled 금지 → 포커스 유지
           disabled={!Number.isFinite(myIdNum) || !roomId}
         />
         <button
-          type="button"
+          type="submit"
           className="send-btn"
-          onMouseDown={(e) => e.preventDefault()}   // ✅ 버튼이 포커스 훔치지 않게
-          onTouchStart={(e) => e.preventDefault()}  // ✅ 모바일 터치도 동일
-          onClick={sendMessage}
+          onMouseDown={(e) => e.preventDefault()} // 마우스 클릭이 포커스 훔치지 않게
           disabled={
             sending || !input.trim() || !Number.isFinite(myIdNum) || !roomId
           }
@@ -455,7 +465,7 @@ export default function ChatRoom() {
         >
           <FaArrowUp size={20} color="white" />
         </button>
-      </div>
+      </form>
 
       {/* 상대방 프로필 모달 */}
       {showProfile && peerIdNum != null && (
@@ -464,7 +474,7 @@ export default function ChatRoom() {
             <YouProfile
               userId={peerIdNum}
               onClose={() => setShowProfile(false)}
-              fromMatching={false} // ✅ 채팅방에서는 플러팅 버튼 숨김
+              fromMatching={false}
             />
           </div>
         </div>
