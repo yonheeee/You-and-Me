@@ -143,3 +143,38 @@
   background: #ff5a91;
   box-shadow: 0 0 0 2px #fff;
 }
+
+/* src/css/common/Menu2.css */
+
+/* 숫자 뱃지 (예: 채팅, 매칭 알림 개수) */
+.menu2-badge-count {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.6rem;
+
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.3rem;
+
+  border-radius: 999px;
+  background-color: #ff3b30; /* iOS 느낌의 빨간색 */
+  color: #fff;
+
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.6rem;
+  text-align: center;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  box-shadow: 0 0 0 2px #fff; /* 테두리처럼 보여서 배경과 구분됨 */
+}
+
+/* 아이콘+뱃지 감싸는 컨테이너 */
+.menu2-icon-wrap {
+  position: relative; /* 뱃지가 이 기준으로 위치 잡음 */
+  display: inline-flex;
+}
+

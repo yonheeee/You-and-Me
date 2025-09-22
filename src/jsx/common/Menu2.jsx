@@ -29,14 +29,13 @@ export default function Menu2() {
   // 🔐 Firebase 인증 완료 여부
   const [authReady, setAuthReady] = useState(false);
 
-  // 채팅 미읽음(파이어스토어)
-  const [hasUnreadChat, setHasUnreadChat] = useState(false);
-  // const [totalUnreadChat, setTotalUnreadChat] = useState(0); // 필요시 숫자 뱃지
+  // 채팅 미읽음 개수
+  const [totalUnreadChat, setTotalUnreadChat] = useState(0);
 
   // 플러팅/매칭 미읽음(notifyStore)
   const unread = useNotifyStore((s) => s.unread);
-  const hasSignal = (unread.signal ?? 0) + (unread.match ?? 0) > 0;
-  // const totalSignal = (unread.signal ?? 0) + (unread.match ?? 0); // 필요시 숫자 뱃지
+  const totalSignal = (unread.signal ?? 0) + (unread.match ?? 0);
+  const hasSignal = totalSignal > 0;
 
   // ✅ 인증 상태 감시
   useEffect(() => {
@@ -56,31 +55,27 @@ export default function Menu2() {
     // 내가 참여한 방 구독
     const q = query(
       collection(db, "chatRooms"),
-      where("participants", "array-contains", keyForParticipants) // 문자열 기반
+      where("participants", "array-contains", keyForParticipants)
     );
 
     const unsub = onSnapshot(
       q,
       (snap) => {
-        let any = false;
-        // let sum = 0;
+        let sum = 0;
         snap.forEach((doc) => {
           const data = doc.data();
           const count =
             data?.unread?.[myUid] ??
             data?.unread?.[myIdStr] ??
             0;
-          if (count > 0) any = true;
-          // sum += Number(count) || 0;
+          sum += Number(count) || 0;
         });
-        setHasUnreadChat(any);
-        // setTotalUnreadChat(sum);
+        setTotalUnreadChat(sum);
       },
       (err) => {
         console.warn("[FS] onSnapshot error:", err.code, err.message);
         if (err.code === "permission-denied") {
-          // 권한 없으면 조용히 false
-          setHasUnreadChat(false);
+          setTotalUnreadChat(0);
         }
       }
     );
@@ -129,7 +124,7 @@ export default function Menu2() {
         )}
       </NavLink>
 
-      {/* 매칭 (🔴 플러팅/매칭 알림 뱃지) */}
+      {/* 매칭 (알림 숫자 뱃지) */}
       <NavLink
         to="/matching"
         className={({ isActive }) =>
@@ -144,8 +139,10 @@ export default function Menu2() {
               ) : (
                 <AiOutlineHeart className="menu2-icon" />
               )}
-              {hasSignal && (
-                <span className="menu2-badge" aria-label="새 알림" />
+              {totalSignal > 0 && (
+                <span className="menu2-badge-count">
+                  {totalSignal > 99 ? "99+" : totalSignal}
+                </span>
               )}
             </span>
             <span className={isActive ? "active" : ""}>매칭</span>
@@ -153,7 +150,7 @@ export default function Menu2() {
         )}
       </NavLink>
 
-      {/* 채팅창 (🔴 채팅 미읽음 배지) */}
+      {/* 채팅창 (새 메시지 숫자 뱃지) */}
       <NavLink
         to="/chat"
         className={({ isActive }) =>
@@ -168,8 +165,10 @@ export default function Menu2() {
               ) : (
                 <BsChatDots className="menu2-icon" />
               )}
-              {hasUnreadChat && (
-                <span className="menu2-badge" aria-label="새 메세지" />
+              {totalUnreadChat > 0 && (
+                <span className="menu2-badge-count">
+                  {totalUnreadChat > 99 ? "99+" : totalUnreadChat}
+                </span>
               )}
             </span>
             <span className={isActive ? "active" : ""}>채팅창</span>
