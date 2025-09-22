@@ -13,6 +13,7 @@ import SockJS from "sockjs-client";
 import ToastCenter from "./jsx/common/ToastCenter.jsx";
 import useRealtimeNotifications from "./hooks/useRealtimeNotifications.js";
 import useNotifyStore from "./api/notifyStore";
+import AppWsBridge from "./AppWsBridge.jsx";
 
 /** STOMP 구독 대상: 컴포넌트 외부에 둬서 재생성 방지 */
 const DEST = {
@@ -208,6 +209,7 @@ export default function App() {
 
   return (
     <div className="App">
+      <AppWsBridge />
       <AppRouter />
       {/* 🔔 토스트 렌더 */}
       <ToastCenter />
