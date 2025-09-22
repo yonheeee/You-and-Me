@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios.js";
-import "../../css/signup/InfoForm.css";
+import "../../css/signup/InfoForm2.css";
 
 /** 서버 스펙: GET /users/me/name/check?name=닉네임 */
 async function checkNicknameAPI(name) {
