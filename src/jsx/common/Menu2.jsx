@@ -35,7 +35,6 @@ export default function Menu2() {
   // 플러팅/매칭 미읽음(notifyStore)
   const unread = useNotifyStore((s) => s.unread);
   const totalSignal = (unread.signal ?? 0) + (unread.match ?? 0);
-  const hasSignal = totalSignal > 0;
 
   // ✅ 인증 상태 감시
   useEffect(() => {

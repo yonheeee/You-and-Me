@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate, Navigate } from "react-router-dom";
 
 import ProtectedRoute from "./ProtectedRoute";
 import ChatRoomGuard from "./jsx/chat/ChatRoomGuard";
@@ -36,6 +36,22 @@ function Layout({ children }) {
       {children}
       {!shouldHide && <Menu />}
     </>
+  );
+}
+
+/** 랭킹 라우트용 래퍼: 학과 */
+function RankingDeptPage() {
+  const navigate = useNavigate();
+  return (
+    <Ranking mode="dept" onClickTopRight={() => navigate("/ranking/mbti")} />
+  );
+}
+
+/** 랭킹 라우트용 래퍼: MBTI */
+function RankingMbtiPage() {
+  const navigate = useNavigate();
+  return (
+    <Ranking mode="mbti" onClickTopRight={() => navigate("/ranking/dept")} />
   );
 }
 
@@ -77,7 +93,6 @@ function AppRouter() {
               </ProtectedRoute>
             }
           />
-
           {/* 회원가입(정보 입력 페이지) */}
           <Route
             path="/infoform"
@@ -104,7 +119,6 @@ function AppRouter() {
             }
           />
           <Route path="/loading" element={<Loader />} />
-
           {/* ✅ 채팅방 라우트: URL에서 roomId 추출 + 현재 로그인 유저 ID 전달 */}
           <Route
             path="/chat/:roomId"
@@ -114,7 +128,13 @@ function AppRouter() {
               </ChatRoomGuard>
             }
           />
-          <Route path="/ranking" element={<Ranking />} />
+          {/* ✅ 랭킹 라우트 */}
+          <Route
+            path="/ranking"
+            element={<Navigate to="/ranking/dept" replace />}
+          />
+          <Route path="/ranking/dept" element={<RankingDeptPage />} />
+          <Route path="/ranking/mbti" element={<RankingMbtiPage />} />{" "}
         </Routes>
       </Layout>
     </BrowserRouter>
