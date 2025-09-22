@@ -7,10 +7,28 @@ let client;                // 싱글톤
 let subs = {};             // 구독 핸들
 let currentToken = null;   // 최신 JWT
 let backoffMs = 0;
+let reconnectTimer = null;
 
 const MIN = 500;
 const MAX = 15000;
 const nextBackoff = (prev) => Math.min(MAX, prev ? prev * 2 : MIN);
+
+const makeDebug = () => {
+  const dev =
+    (typeof process !== "undefined" && process.env?.NODE_ENV !== "production") ||
+    typeof process === "undefined"; // 브라우저 환경 기본 on
+  return (msg) => {
+    if (!dev) return;
+    if (typeof console?.log === "function") console.log(`[STOMP] ${msg}`);
+  };
+};
+
+function clearReconnectTimer() {
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+}
 
 function makeClient(token, handlers = {}) {
   const { onSignals, onMatches, onConnected, onDisconnected } = handlers;
@@ -18,18 +36,30 @@ function makeClient(token, handlers = {}) {
   const c = new Client({
     // SockJS는 http(s):// 를 사용
     webSocketFactory: () => new SockJS(WS_ENDPOINT),
+
     // ✅ 가장 중요: CONNECT 네이티브 헤더에 Authorization 정확히 세팅
     connectHeaders: { Authorization: `Bearer ${token}` },
 
-    // 디버그 로그 (원하면 끄세요)
-    debug: (str) => console.log(`[STOMP] ${str}`),
+    // 최신 토큰을 항상 싣기 위해 실제 연결 직전에 갱신
+    beforeConnect: () => {
+      c.connectHeaders = { Authorization: `Bearer ${currentToken || token}` };
+    },
+
+    // 안전한 debug 함수 (호출 금지! 괄호 X)
+    debug: makeDebug(),
+
+    // 기본 하트비트 (백엔드 허용 범위에 맞게 필요시 조정)
+    heartbeatIncoming: 10000,
+    heartbeatOutgoing: 10000,
 
     // 라이브러리 내장 reconnectDelay는 0으로 두고, 우리가 커스텀 백오프
     reconnectDelay: 0,
 
     onConnect: () => {
-      console.log("[STOMP] CONNECTED");
+      makeSureDebugIsFunction(c);
+      clearReconnectTimer();
       backoffMs = 0;
+      console.log("[STOMP] CONNECTED");
 
       // 구독 재설정
       unsubAll();
@@ -57,8 +87,8 @@ function makeClient(token, handlers = {}) {
 
     onStompError: (frame) => {
       // 401/403 등 → Authorization 문제 가능성 높음
-      console.error("[STOMP] ERROR", frame.headers["message"], frame.body);
-      scheduleReconnect(); // 백오프 재시도
+      console.error("[STOMP] ERROR", frame.headers?.["message"], frame.body);
+      scheduleReconnect();
     },
 
     onWebSocketClose: (evt) => {
@@ -72,27 +102,49 @@ function makeClient(token, handlers = {}) {
     },
   });
 
+  // 혹시 외부에서 덮어써도 무조건 함수가 되게 방어
+  makeSureDebugIsFunction(c);
+
   return c;
+}
+
+function makeSureDebugIsFunction(c) {
+  if (typeof c.debug !== "function") {
+    try {
+      // 덮어쓰기 방지(옵셔널) — 외부에서 true 같은 걸 대입해도 getter가 함수 반환
+      Object.defineProperty(c, "debug", {
+        configurable: true,
+        get: () => makeDebug(),
+        set: () => {}, // 무시
+      });
+    } catch {
+      // defineProperty 실패 시에도 최소 no-op 보장
+      c.debug = () => {};
+    }
+  }
 }
 
 function unsubAll() {
   Object.values(subs).forEach((s) => {
-    try { s?.unsubscribe(); } catch {}
+    try {
+      s?.unsubscribe();
+    } catch {}
   });
   subs = {};
 }
 
 function scheduleReconnect() {
-  if (!client) return;
+  // 명시적 로그아웃 등
+  if (!currentToken) return;
 
-  // 이미 active면 자연 종료를 기다림
-  if (client.active) return;
+  // 이미 active/connecting이면 중복 예약 금지
+  if (client?.active || client?.connecting) return;
 
   unsubAll();
   backoffMs = nextBackoff(backoffMs);
+  clearReconnectTimer();
 
-  // 최신 토큰 헤더로 재활성화
-  setTimeout(() => {
+  reconnectTimer = setTimeout(() => {
     if (!currentToken) return; // 로그아웃 등
     try {
       client.connectHeaders = { Authorization: `Bearer ${currentToken}` };
@@ -104,7 +156,7 @@ function scheduleReconnect() {
 }
 
 export function activate(token, handlers) {
-  if (client?.active) return client; // 탭당 1개 유지
+  if (client?.active || client?.connecting) return client; // 탭당 1개 유지
   currentToken = token;
   client = makeClient(token, handlers);
   client.activate();
@@ -113,6 +165,7 @@ export function activate(token, handlers) {
 
 export async function deactivate() {
   currentToken = null;
+  clearReconnectTimer();
   if (!client) return;
   try {
     unsubAll();
@@ -121,16 +174,17 @@ export async function deactivate() {
     console.warn("[STOMP] deactivate error", e);
   } finally {
     client = undefined;
+    backoffMs = 0;
   }
 }
 
 export async function refreshToken(newToken) {
   currentToken = newToken;
   if (!client) return;
-  // 새 CONNECT 헤더 반영을 위해 재활성화
+  clearReconnectTimer();
   try {
-    await client.deactivate();
+    await client.deactivate(); // 기존 연결 종료
   } catch {}
   client.connectHeaders = { Authorization: `Bearer ${newToken}` };
-  client.activate();
+  client.activate(); // 새 토큰으로 재연결
 }
