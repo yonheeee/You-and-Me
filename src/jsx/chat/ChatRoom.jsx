@@ -13,7 +13,7 @@ import {
   getDoc,
   runTransaction,
   deleteDoc,
-  writeBatch, // ✅ 메시지 단위 읽음처리(batch)
+  writeBatch,
 } from "firebase/firestore";
 import { db, auth } from "../../libs/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -45,6 +45,7 @@ export default function ChatRoom() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const inputWrapperRef = useRef(null);
+  const composingRef = useRef(false); // ✅ 한글 IME 조합 상태
 
   // Firebase Auth 준비
   useEffect(() => {
@@ -147,37 +148,34 @@ export default function ChatRoom() {
   }, []);
 
   // ✅ 메시지 단위 읽음 처리 (내 userId를 readBy에 기록)
-  const markAllAsRead = useCallback(async (roomId, userIdStr, list) => {
-    if (!roomId || !userIdStr || !Array.isArray(list) || list.length === 0)
-      return;
-    try {
-      const batch = writeBatch(db);
-      const msgCol = collection(db, "chatRooms", roomId, "messages");
-      let dirty = 0;
+  const markAllAsRead = useCallback(
+    async (roomId, userIdStr, list) => {
+      if (!roomId || !userIdStr || !Array.isArray(list) || list.length === 0)
+        return;
+      try {
+        const batch = writeBatch(db);
+        const msgCol = collection(db, "chatRooms", roomId, "messages");
+        let dirty = 0;
 
-      for (const msg of list) {
-        // 이미 내가 읽은 메시지는 스킵
-        if (msg?.readBy?.[userIdStr]) continue;
+        for (const msg of list) {
+          if (msg?.readBy?.[userIdStr]) continue; // 이미 읽은 메시지는 스킵
+          const msgRef = doc(msgCol, msg.id);
+          batch.update(msgRef, { [`readBy.${userIdStr}`]: true });
+          dirty++;
+          if (dirty >= 450) break; // 배치 안전선
+        }
 
-        // 메시지 문서 참조
-        const msgRef = doc(msgCol, msg.id);
-        batch.update(msgRef, {
-          [`readBy.${userIdStr}`]: true,
-        });
-        dirty++;
-        // 너무 많아질 경우 배치 제한 방어 (선택)
-        if (dirty >= 450) break;
+        if (dirty > 0) {
+          await batch.commit();
+        }
+      } catch (e) {
+        console.warn("markAllAsRead failed", e);
       }
+    },
+    []
+  );
 
-      if (dirty > 0) {
-        await batch.commit();
-      }
-    } catch (e) {
-      console.warn("markAllAsRead failed", e);
-    }
-  }, []);
-
-  // ✅ 조건 맞으면 읽음 처리 트리거 (카톡 UX: 마지막 메시지가 '상대'가 보낸 것이면)
+  // ✅ 조건 맞으면 읽음 처리 트리거
   const maybeMarkAsRead = useCallback(
     (list) => {
       if (!roomId || !myIdStr || !Array.isArray(list) || list.length === 0)
@@ -187,9 +185,7 @@ export default function ChatRoom() {
 
       const last = list[list.length - 1];
       if (Number(last?.senderId) !== myIdNum) {
-        // 1) 메시지 단위 readBy에 내 아이디 기록
         markAllAsRead(roomId, myIdStr, list);
-        // 2) 방 unread 0
         markRoomUnreadZero(roomId, myIdStr);
       }
     },
@@ -215,7 +211,7 @@ export default function ChatRoom() {
         setMessages(newMessages);
 
         const added = snapshot.docChanges().some((c) => c.type === "added");
-        if (added) maybeMarkAsRead(newMessages); // ✅ 새 메시지 오면 읽음 처리 시도
+        if (added) maybeMarkAsRead(newMessages);
         smartScrollToBottom();
       },
       (err) => {
@@ -228,9 +224,7 @@ export default function ChatRoom() {
 
   // 포커스/가시성 변화 시 읽음 처리
   useEffect(() => {
-    const onFocusOrVisible = () => {
-      maybeMarkAsRead(messages);
-    };
+    const onFocusOrVisible = () => maybeMarkAsRead(messages);
     window.addEventListener("focus", onFocusOrVisible);
     document.addEventListener("visibilitychange", onFocusOrVisible);
     return () => {
@@ -264,11 +258,7 @@ export default function ChatRoom() {
     const text = input.trim();
     if (!text) return;
     if (!Number.isFinite(myIdNum) || !roomId) return;
-    if (
-      !Array.isArray(roomInfo?.participants) ||
-      roomInfo.participants.length < 2
-    )
-      return;
+    if (!Array.isArray(roomInfo?.participants) || roomInfo.participants.length < 2) return;
 
     setSending(true);
     try {
@@ -291,9 +281,7 @@ export default function ChatRoom() {
           text,
           senderId: myIdNum,
           createdAt: now,
-          readBy: {
-            [String(myIdNum)]: true,
-          },
+          readBy: { [String(myIdNum)]: true },
         });
 
         // ✅ 방의 lastMessage + 상대 unread 증가
@@ -307,8 +295,12 @@ export default function ChatRoom() {
         });
       });
 
+      // ✅ 입력값 비우고, 키보드/포커스 유지
       setInput("");
-      inputRef.current?.focus();
+      requestAnimationFrame(() => {
+        inputRef.current?.focus({ preventScroll: true });
+      });
+
       smartScrollToBottom(true);
     } catch (e) {
       console.error("sendMessage failed:", e);
@@ -318,6 +310,9 @@ export default function ChatRoom() {
   }
 
   function handleKeyDown(e) {
+    // ✅ 한글 조합 중이면 Enter 무시 (전송 방지)
+    if (composingRef.current) return;
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (!sending) sendMessage();
@@ -441,12 +436,17 @@ export default function ChatRoom() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
+          onCompositionStart={() => (composingRef.current = true)}  // ✅ IME 시작
+          onCompositionEnd={() => (composingRef.current = false)}    // ✅ IME 종료
           placeholder="메세지를 입력해주세요."
-          disabled={sending || !Number.isFinite(myIdNum) || !roomId}
+          // ❗ sending 때문에 disabled로 포커스 잃지 않도록
+          disabled={!Number.isFinite(myIdNum) || !roomId}
         />
         <button
           type="button"
           className="send-btn"
+          onMouseDown={(e) => e.preventDefault()}   // ✅ 버튼이 포커스 훔치지 않게
+          onTouchStart={(e) => e.preventDefault()}  // ✅ 모바일 터치도 동일
           onClick={sendMessage}
           disabled={
             sending || !input.trim() || !Number.isFinite(myIdNum) || !roomId
