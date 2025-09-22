@@ -245,3 +245,10 @@
 .leave-btn:hover {
   background: rgba(231, 76, 60, 0.08);
 }
+
+/* 메시지 시간 옆 읽음/안읽음 표시 */
+.chat-msg .time .read-status {
+  margin-left: 6px;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}

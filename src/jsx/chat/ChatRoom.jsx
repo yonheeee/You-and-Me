@@ -13,6 +13,7 @@ import {
   getDoc,
   runTransaction,
   deleteDoc,
+  writeBatch, // ✅ 메시지 단위 읽음처리(batch)
 } from "firebase/firestore";
 import { db, auth } from "../../libs/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -79,6 +80,10 @@ export default function ChatRoom() {
     () => participants.find((id) => id !== myIdNum) ?? null,
     [participants, myIdNum]
   );
+  const peerIdStr = useMemo(
+    () => (Number.isFinite(peerIdNum) ? String(peerIdNum) : ""),
+    [peerIdNum]
+  );
 
   const peersByUserId = useMemo(() => {
     const out = {};
@@ -111,7 +116,7 @@ export default function ChatRoom() {
     }
   }
 
-  // === 메시지 관련 함수들 ===
+  // === 스크롤/읽음 관련 유틸 ===
   const isNearBottom = useCallback(() => {
     const el = messagesWrapRef.current;
     if (!el) return true;
@@ -131,15 +136,48 @@ export default function ChatRoom() {
     [isNearBottom]
   );
 
-  const markAsRead = useCallback(async (roomId, userIdStr) => {
+  // ✅ 방 레벨 unread 카운터 0으로
+  const markRoomUnreadZero = useCallback(async (roomId, userIdStr) => {
     try {
       const roomRef = doc(db, "chatRooms", roomId);
       await updateDoc(roomRef, { [`unread.${userIdStr}`]: 0 });
     } catch (e) {
-      console.warn("markAsRead failed", e);
+      console.warn("markRoomUnreadZero failed", e);
     }
   }, []);
 
+  // ✅ 메시지 단위 읽음 처리 (내 userId를 readBy에 기록)
+  const markAllAsRead = useCallback(async (roomId, userIdStr, list) => {
+    if (!roomId || !userIdStr || !Array.isArray(list) || list.length === 0)
+      return;
+    try {
+      const batch = writeBatch(db);
+      const msgCol = collection(db, "chatRooms", roomId, "messages");
+      let dirty = 0;
+
+      for (const msg of list) {
+        // 이미 내가 읽은 메시지는 스킵
+        if (msg?.readBy?.[userIdStr]) continue;
+
+        // 메시지 문서 참조
+        const msgRef = doc(msgCol, msg.id);
+        batch.update(msgRef, {
+          [`readBy.${userIdStr}`]: true,
+        });
+        dirty++;
+        // 너무 많아질 경우 배치 제한 방어 (선택)
+        if (dirty >= 450) break;
+      }
+
+      if (dirty > 0) {
+        await batch.commit();
+      }
+    } catch (e) {
+      console.warn("markAllAsRead failed", e);
+    }
+  }, []);
+
+  // ✅ 조건 맞으면 읽음 처리 트리거 (카톡 UX: 마지막 메시지가 '상대'가 보낸 것이면)
   const maybeMarkAsRead = useCallback(
     (list) => {
       if (!roomId || !myIdStr || !Array.isArray(list) || list.length === 0)
@@ -149,10 +187,13 @@ export default function ChatRoom() {
 
       const last = list[list.length - 1];
       if (Number(last?.senderId) !== myIdNum) {
-        markAsRead(roomId, myIdStr);
+        // 1) 메시지 단위 readBy에 내 아이디 기록
+        markAllAsRead(roomId, myIdStr, list);
+        // 2) 방 unread 0
+        markRoomUnreadZero(roomId, myIdStr);
       }
     },
-    [roomId, myIdStr, myIdNum, markAsRead]
+    [roomId, myIdStr, myIdNum, markAllAsRead, markRoomUnreadZero]
   );
 
   // 메시지 구독
@@ -174,7 +215,7 @@ export default function ChatRoom() {
         setMessages(newMessages);
 
         const added = snapshot.docChanges().some((c) => c.type === "added");
-        if (added) maybeMarkAsRead(newMessages);
+        if (added) maybeMarkAsRead(newMessages); // ✅ 새 메시지 오면 읽음 처리 시도
         smartScrollToBottom();
       },
       (err) => {
@@ -187,7 +228,9 @@ export default function ChatRoom() {
 
   // 포커스/가시성 변화 시 읽음 처리
   useEffect(() => {
-    const onFocusOrVisible = () => maybeMarkAsRead(messages);
+    const onFocusOrVisible = () => {
+      maybeMarkAsRead(messages);
+    };
     window.addEventListener("focus", onFocusOrVisible);
     document.addEventListener("visibilitychange", onFocusOrVisible);
     return () => {
@@ -199,9 +242,10 @@ export default function ChatRoom() {
   // 최초 입장 시 읽음 처리
   useEffect(() => {
     if (authReady && roomId && myIdStr) {
-      markAsRead(roomId, myIdStr);
+      markAllAsRead(roomId, myIdStr, messages);
+      markRoomUnreadZero(roomId, myIdStr);
     }
-  }, [authReady, roomId, myIdStr, markAsRead]);
+  }, [authReady, roomId, myIdStr, messages, markAllAsRead, markRoomUnreadZero]);
 
   // iOS 키보드 대응
   useEffect(() => {
@@ -215,6 +259,7 @@ export default function ChatRoom() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // 메시지 전송
   async function sendMessage() {
     const text = input.trim();
     if (!text) return;
@@ -239,17 +284,24 @@ export default function ChatRoom() {
         if (!Number.isFinite(receiverIdNum)) throw new Error("Peer not found");
 
         const newMsgRef = doc(msgColRef);
+        const now = serverTimestamp();
+
+        // ✅ 메시지에 readBy 추가 (보낸 사람은 자동 읽음)
         tx.set(newMsgRef, {
           text,
           senderId: myIdNum,
-          createdAt: serverTimestamp(),
+          createdAt: now,
+          readBy: {
+            [String(myIdNum)]: true,
+          },
         });
 
+        // ✅ 방의 lastMessage + 상대 unread 증가
         tx.update(roomRef, {
           lastMessage: {
             text,
             senderId: myIdNum,
-            createdAt: serverTimestamp(),
+            createdAt: now,
           },
           [`unread.${String(receiverIdNum)}`]: increment(1),
         });
@@ -348,6 +400,9 @@ export default function ChatRoom() {
         {messages.map((msg) => {
           const isMe = Number(msg.senderId) === myIdNum;
           const senderData = peersByUserId[Number(msg.senderId)] || {};
+          const peerHasRead =
+            isMe && peerIdStr ? Boolean(msg?.readBy?.[peerIdStr]) : false;
+
           return (
             <div key={msg.id} className={`chat-msg ${isMe ? "me" : "other"}`}>
               {!isMe && (
@@ -364,7 +419,14 @@ export default function ChatRoom() {
                   <div className="name">{senderData.name}</div>
                 )}
                 <div className="bubble">{msg.text}</div>
-                <div className="time">{formatTime(msg.createdAt)}</div>
+                <div className="time">
+                  {formatTime(msg.createdAt)}
+                  {isMe && (
+                    <span className="read-status" aria-label="read-status">
+                      {peerHasRead ? "읽음" : "1"}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           );
