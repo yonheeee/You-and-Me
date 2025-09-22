@@ -131,22 +131,3 @@
 .menu2 .menu2-item .menu2-icon {
   touch-action: manipulation;
 }
-
-/* 다크모드 보정(선택) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --menu-bg: #111;
-    --menu-border: #222;
-    --menu-text: #b7b7b7;
-    --menu-icon: #c2c2c2;
-    --menu-active: #E8048D;
-  }
-  .menu2 {
-    background: var(--menu-bg);
-    border-top-color: var(--menu-border);
-  }
-  .menu2 .menu2-badge,
-  .menu2 .menu2-badge-count {
-    box-shadow: 0 0 0 2px var(--menu-bg);
-  }
-}

@@ -5,7 +5,6 @@ import "../../css/home/DrinkMenu.css";
 import lovePotionImg from "../../image/home/icetea.svg";
 import americanoImg from "../../image/home/icetea.svg";
 import icedTeaImg from "../../image/home/icetea.svg";
-import milkisImg from "../../image/home/icetea.svg";
 
 export default function DrinkMenu() {
   // 상수 데이터
@@ -30,13 +29,6 @@ export default function DrinkMenu() {
       price: 1500,
       desc: "상큼 달콤한 시원함! 누구나 좋아하는 음료예요.",
       image: icedTeaImg,
-    },
-    {
-      id: "milkis",
-      name: "밀키스",
-      price: 2000,
-      desc: "톡 쏘는 청량감에 부드러운 맛까지, 남녀노소 인기 만점!",
-      image: milkisImg,
     },
   ];
 

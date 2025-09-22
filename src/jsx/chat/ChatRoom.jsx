@@ -47,11 +47,19 @@ export default function ChatRoom() {
   const inputWrapperRef = useRef(null);
   const composingRef = useRef(false); // 한글 IME 조합 상태
 
+  // 포커스 보강: 전송 후/터치 후 안전 포커스
   const refocusInput = useCallback(() => {
-    // 렌더/제출 타이밍 보정
     setTimeout(() => {
       inputRef.current?.focus({ preventScroll: true });
     }, 0);
+  }, []);
+
+  // iOS 포커스 보정: 입력 포커스 시 body unlock, 블러 시 재잠금
+  const unlockBodyScroll = useCallback(() => {
+    document.body.style.overflow = "auto";
+  }, []);
+  const lockBodyScroll = useCallback(() => {
+    document.body.style.overflow = "hidden";
   }, []);
 
   // Firebase Auth 준비
@@ -60,13 +68,13 @@ export default function ChatRoom() {
     return unsub;
   }, []);
 
-  // body 스크롤 막기
+  // 기본적으로 body 스크롤 잠금 (채팅화면)
   useEffect(() => {
-    document.body.style.overflow = "hidden";
+    lockBodyScroll();
     return () => {
       document.body.style.overflow = "auto";
     };
-  }, []);
+  }, [lockBodyScroll]);
 
   // 방 정보 불러오기
   useEffect(() => {
@@ -248,7 +256,7 @@ export default function ChatRoom() {
     }
   }, [authReady, roomId, myIdStr, messages, markAllAsRead, markRoomUnreadZero]);
 
-  // iOS 키보드 대응
+  // iOS 키보드/뷰포트 대응
   useEffect(() => {
     const handleResize = () => {
       if (!chatroomRef.current || !inputWrapperRef.current) return;
@@ -303,7 +311,7 @@ export default function ChatRoom() {
       });
 
       setInput("");
-      refocusInput(); // PC/모바일 모두 포커스 유지
+      refocusInput(); // 포커스 유지
       smartScrollToBottom(true);
     } catch (e) {
       console.error("sendMessage failed:", e);
@@ -324,6 +332,15 @@ export default function ChatRoom() {
     if (e.key === "Enter" && composingRef.current) {
       e.preventDefault();
       e.stopPropagation();
+    }
+  }
+
+  // 입력영역 아무데나 터치해도 포커스 열기 (iOS 보강)
+  function handleInputWrapperTouchEnd(e) {
+    // 버튼/아이콘 아닌 곳 터치 시에도 input에 포커스 줌
+    const tag = (e.target.tagName || "").toUpperCase();
+    if (tag !== "INPUT" && tag !== "TEXTAREA" && inputRef.current) {
+      refocusInput();
     }
   }
 
@@ -405,7 +422,7 @@ export default function ChatRoom() {
           const peerHasRead =
             isMe && peerIdStr ? Boolean(msg?.readBy?.[peerIdStr]) : false;
 
-          return (
+        return (
             <div key={msg.id} className={`chat-msg ${isMe ? "me" : "other"}`}>
               {!isMe && (
                 <img
@@ -441,6 +458,9 @@ export default function ChatRoom() {
         className="chatroom-input"
         ref={inputWrapperRef}
         onSubmit={handleSubmit}
+        onTouchEnd={handleInputWrapperTouchEnd}   // iOS 터치-포커스 보강
+        onPointerUp={handleInputWrapperTouchEnd}  // 일부 브라우저 보강
+        style={{ zIndex: 200 }}                   // 메뉴보다 높게
       >
         <input
           autoFocus
@@ -450,14 +470,19 @@ export default function ChatRoom() {
           onKeyDown={handleKeyDown}
           onCompositionStart={() => (composingRef.current = true)}
           onCompositionEnd={() => (composingRef.current = false)}
+          onFocus={unlockBodyScroll}  // 포커스 시 body unlock (iOS 키보드 오픈 안정화)
+          onBlur={lockBodyScroll}     // 블러 시 다시 잠금
           placeholder="메세지를 입력해주세요."
-          // sending 동안에도 disabled 금지 → 포커스 유지
+          inputMode="text"
+          enterKeyHint="send"
+          // sending 중에도 disabled 금지 → 포커스 유지
           disabled={!Number.isFinite(myIdNum) || !roomId}
         />
         <button
           type="submit"
           className="send-btn"
-          onMouseDown={(e) => e.preventDefault()} // 마우스 클릭이 포커스 훔치지 않게
+          onMouseDown={(e) => e.preventDefault()} // 버튼이 포커스 훔치지 않게
+          onTouchStart={(e) => e.preventDefault()}
           disabled={
             sending || !input.trim() || !Number.isFinite(myIdNum) || !roomId
           }
