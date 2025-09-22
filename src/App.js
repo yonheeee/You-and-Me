@@ -1,11 +1,5 @@
 // src/App.jsx
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
-  useCallback,
-} from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import AppRouter from "./Router";
 import { willExpireSoon, refreshAccessToken } from "./api/axios";
 import useUserStore from "./api/userStore.js";
@@ -13,8 +7,9 @@ import { auth } from "./libs/firebase";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import Loader from "./jsx/common/Loader.jsx";
 import { Client as StompClient } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
-/** 🔔 알림 시스템 추가 */
+/** 🔔 알림 시스템 */
 import ToastCenter from "./jsx/common/ToastCenter.jsx";
 import useRealtimeNotifications from "./hooks/useRealtimeNotifications.js";
 import useNotifyStore from "./api/notifyStore";
@@ -49,12 +44,8 @@ export default function App() {
     const bootstrap = async () => {
       try {
         const access = useUserStore.getState().user?.accessToken;
-        if (access && willExpireSoon(access, 90)) {
-          await refreshAccessToken().catch(() => {});
-        }
-        if (!access) {
-          await refreshAccessToken().catch(() => {});
-        }
+        if (access && willExpireSoon(access, 90)) await refreshAccessToken().catch(() => {});
+        if (!access) await refreshAccessToken().catch(() => {});
       } catch (e) {
         console.error("초기 부팅 중 오류:", e);
       } finally {
@@ -67,6 +58,7 @@ export default function App() {
   /** ========= STOMP ========= */
   const stompRef = useRef(null);
   const reconnectTimer = useRef(null);
+  const connectStompRef = useRef(null);
 
   // API/WS URL 계산: 메모이즈로 고정
   const API_BASE_URL = useMemo(() => {
@@ -75,34 +67,18 @@ export default function App() {
     const fromCRA = process.env.REACT_APP_API_URL;
     return (fromVite || fromCRA || "http://localhost:4000/api").trim();
   }, []);
+  const WS_URL = useMemo(() => API_BASE_URL.replace(/\/+$/, "") + "/ws", [API_BASE_URL]);
 
-  const WS_URL = useMemo(
-    () => API_BASE_URL.replace(/\/+$/, "") + "/ws",
-    [API_BASE_URL]
-  );
-
-  const WS_BROKER_URL = useMemo(
-    () =>
-      WS_URL.startsWith("https")
-        ? WS_URL.replace(/^https/, "wss")
-        : WS_URL.replace(/^http/, "ws"),
-    [WS_URL]
-  );
-
-  // 최신 connectStomp 참조를 위한 ref(타이머 콜백에서 사용)
-  const connectStompRef = useRef(null);
-
-  /** STOMP 연결 함수: useCallback으로 고정 */
+  /** STOMP 연결 함수: SockJS 사용 */
   const connectStomp = useCallback(
     (token) => {
       if (!token) return;
 
-      // 예정된 재연결 제거(중복 연결 방지)
+      // 예정된 재연결 제거
       if (reconnectTimer.current) {
         clearTimeout(reconnectTimer.current);
         reconnectTimer.current = null;
       }
-
       // 기존 클라이언트 정리
       if (stompRef.current) {
         try {
@@ -112,24 +88,27 @@ export default function App() {
       }
 
       const client = new StompClient({
-        brokerURL: WS_BROKER_URL,
-        connectHeaders: { Authorization: `Bearer ${token}` },
+        // SockJS는 http(s) URL 사용
+        webSocketFactory: () =>
+          new SockJS(WS_URL, null, {
+            transports: ["websocket", "xhr-streaming", "xhr-polling"],
+          }),
+        connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
         debug:
           process.env.NODE_ENV === "development"
             ? (str) => console.log("[STOMP] ", str)
             : undefined,
-        reconnectDelay: 0, // 직접 타이머로 재연결 관리
+        reconnectDelay: 0, // 재연결은 우리가 타이머로 관리
         heartbeatIncoming: 10000,
         heartbeatOutgoing: 10000,
+
         onConnect: () => {
           console.log("[STOMP] connected");
 
           client.subscribe(DEST.signals, (msg) => {
             try {
               const payload = JSON.parse(msg.body);
-              window.dispatchEvent(
-                new CustomEvent("rt:signal", { detail: payload })
-              );
+              window.dispatchEvent(new CustomEvent("rt:signal", { detail: payload }));
             } catch (e) {
               console.warn("signals payload parse error:", e);
             }
@@ -138,20 +117,15 @@ export default function App() {
           client.subscribe(DEST.matches, (msg) => {
             try {
               const payload = JSON.parse(msg.body);
-              window.dispatchEvent(
-                new CustomEvent("rt:match", { detail: payload })
-              );
+              window.dispatchEvent(new CustomEvent("rt:match", { detail: payload }));
             } catch (e) {
               console.warn("matches payload parse error:", e);
             }
           });
         },
+
         onStompError: (frame) => {
-          console.error(
-            "[STOMP] broker error",
-            frame.headers["message"],
-            frame.body
-          );
+          console.error("[STOMP] broker error", frame.headers["message"], frame.body);
         },
         onWebSocketError: (e) => {
           console.error("[STOMP] ws error", e);
@@ -169,10 +143,10 @@ export default function App() {
       stompRef.current = client;
       client.activate();
     },
-    [WS_BROKER_URL]
+    [WS_URL]
   );
 
-  // 최신 connectStomp를 ref에 유지
+  // 최신 connectStomp를 ref에 유지 (재연결 타이머에서 사용)
   useEffect(() => {
     connectStompRef.current = connectStomp;
   }, [connectStomp]);
@@ -181,7 +155,6 @@ export default function App() {
   useEffect(() => {
     const token = user?.accessToken;
     if (token) connectStomp(token);
-
     return () => {
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
     };

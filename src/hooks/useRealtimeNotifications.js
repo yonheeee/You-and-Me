@@ -10,34 +10,52 @@ export default function useRealtimeNotifications() {
       const p = e.detail;
       if (!p) return;
 
-      if (p.type === "DECLINED") {
-        enqueue({
-          kind: "signal",
-          title: "플러팅이 거절되었어요",
-          body: p.message ?? "상대가 이번엔 패스했어요.",
-          payload: p,
-        });
-      } else if (p.type === "ACCEPTED") {
-        enqueue({
-          kind: "match",
-          title: "플러팅 수락!",
-          body: `${p.toUser?.name ?? "상대"}님이 플러팅을 수락했어요.`,
-          payload: p,
-        });
-      } else if (p.type === "RECEIVED" || p.type === "NEW" || p.direction === "INCOMING") {
-        enqueue({
-          kind: "signal",
-          title: "새 플러팅 도착",
-          body: `${p.fromUser?.name ?? "누군가"}님이 관심을 보냈어요.`,
-          payload: p,
-        });
-      } else {
-        enqueue({
-          kind: "signal",
-          title: "플러팅 업데이트",
-          body: p.message ?? "신호 상태가 변경되었어요.",
-          payload: p,
-        });
+      switch (p.type) {
+        case "DECLINED":
+          enqueue({
+            kind: "signal",
+            title: "플러팅이 거절되었어요",
+            body: p.message ?? "상대가 이번엔 패스했어요.",
+            payload: p,
+          });
+          break;
+
+        case "ACCEPTED":
+          if (p.direction === "OUTGOING") {
+            enqueue({
+              kind: "match",
+              title: "상대가 수락했어요!",
+              body: `${p.toUser?.name ?? "상대"}님이 플러팅을 수락했어요.`,
+              payload: p,
+            });
+          } else {
+            enqueue({
+              kind: "match",
+              title: "플러팅 수락 완료",
+              body: "상대를 수락하여 매칭되었습니다.",
+              payload: p,
+            });
+          }
+          break;
+
+        case "RECEIVED":
+        case "NEW":
+          enqueue({
+            kind: "signal",
+            title: "새 플러팅 도착",
+            body: `${p.fromUser?.name ?? "누군가"}님이 관심을 보냈어요.`,
+            payload: p,
+          });
+          break;
+
+        default:
+          enqueue({
+            kind: "signal",
+            title: "플러팅 업데이트",
+            body: p.message ?? "신호 상태가 변경되었어요.",
+            payload: p,
+          });
+          break;
       }
     };
 

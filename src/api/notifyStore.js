@@ -1,4 +1,3 @@
-// src/api/notifyStore.js
 import { create } from "zustand";
 
 function genId() {
@@ -11,13 +10,19 @@ const useNotifyStore = create((set, get) => ({
 
   enqueue: (toast) => {
     const id = toast.id ?? genId();
-    const t = { id, ts: Date.now(), duration: toast.duration ?? 4000, ...toast };
+    const kind = toast.kind ?? "other";
+    const key = toast.key ?? `${kind}-${toast.payload?.signalId ?? toast.payload?.matchId ?? ""}`;
+
+    // Deduplication: 동일 key가 이미 있으면 skip
+    if (key && get().toasts.some((x) => x.key === key)) return null;
+
+    const t = { id, key, ts: Date.now(), duration: toast.duration ?? 4000, ...toast };
 
     set((s) => ({
-      toasts: [...s.toasts, t].slice(-5), // 최근 5개만 보관
+      toasts: [...s.toasts, t].slice(-5),
       unread: {
         ...s.unread,
-        [t.kind ?? "other"]: (s.unread[t.kind ?? "other"] ?? 0) + 1,
+        [kind]: Math.min((s.unread[kind] ?? 0) + 1, 99), // cap 99
       },
     }));
 
@@ -49,7 +54,7 @@ const useNotifyStore = create((set, get) => ({
     const n = new Notification(t.title ?? "알림", {
       body: t.body ?? "",
       icon: t.icon ?? "/favicon.ico",
-      tag: t.kind ?? "notice",
+      tag: t.key ?? t.kind ?? "notice",
     });
     n.onclick = () => {
       window.focus();

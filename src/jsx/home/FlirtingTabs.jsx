@@ -49,9 +49,10 @@ export default function FlirtingTabs() {
 
   // 화면 진입/탭 전환 시 읽음 처리
   useEffect(() => {
-    // 이 화면에서는 플러팅/매칭 두 종류 모두 소비된다고 가정
-    markRead("signal");
-    markRead("match");
+    if (activeTab === "received") {
+      markRead("signal"); // 받은 플러팅 볼 때만 소진
+    }
+    markRead("match"); // 매칭은 글로벌하게 소진
   }, [activeTab, markRead]);
 
   // 디바운스 리로드
@@ -128,7 +129,8 @@ export default function FlirtingTabs() {
     setOpenProfile(true);
   };
 
-  const unreadSignalCount = unread.signal ?? 0; // 받은 플러팅 기준
+  // signal + match 합산 뱃지
+  const unreadSignalCount = (unread.signal ?? 0) + (unread.match ?? 0);
 
   return (
     <div className="flirting-tabs">
