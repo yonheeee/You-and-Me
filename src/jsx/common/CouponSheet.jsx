@@ -101,9 +101,11 @@ export default function CouponSheet({ open, onClose }) {
 
   if (!open && !closing) return null;
 
+  // ✅ 영문+숫자만 허용, 자동 대문자화
   const handleChange = (e) => {
-    const onlyDigits = e.target.value.replace(/\D/g, "");
-    setCode(onlyDigits);
+    const raw = e.target.value;
+    const alnum = raw.replace(/[^a-z0-9]/gi, "").toUpperCase();
+    setCode(alnum.slice(0, 12)); // 안전하게 12자 제한
     setMessage("");
   };
 
@@ -163,7 +165,13 @@ export default function CouponSheet({ open, onClose }) {
             className="coupon-input"
             type="text"
             placeholder="인증번호 입력하기"
-            inputMode="numeric"
+            // ⬇️ 영문+숫자 입력에 맞춘 힌트/옵션
+            inputMode="text"
+            autoCapitalize="characters"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            pattern="[A-Za-z0-9]*"
             value={code}
             onChange={handleChange}
             maxLength={12}
