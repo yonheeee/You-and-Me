@@ -8,10 +8,11 @@ import useUserStore from "../../api/userStore"; // ✅ 스토어 임포트
 
 import starImg from "../../image/matching/star.svg";
 import unKnownImg from "../../image/matching/unknown.svg";
+import ConfirmModal from "../common/ConfirmModal.jsx"; // ✅ 공통 컨펌 모달
 
 const FIXED_STARS = [
   { id: 0, left: 26, top: 10, size: 100, rot: 0, op: 0.55 },
-  { id: 1, left: 10, top: 50, size: 80, rot: 0, op: 0.5 },
+  { id: 1, left: 10, top: 50, size: 80, rot: 0.5, op: 0.5 },
   { id: 2, left: 88, top: 37, size: 110, rot: 0, op: 0.6 },
 ];
 
@@ -29,6 +30,25 @@ export default function Matching() {
   const [loading, setLoading] = useState(false);
   const [goCard, setGoCard] = useState(false);
   const [resultList, setResultList] = useState([]);
+
+  // ✅ 유저(크레딧 확인용)
+  const user = useUserStore((s) => s.user);
+
+  // ====== 컨펌 모달 상태 ======
+  const [confirm, setConfirm] = useState(null);
+  const openConfirm = (opts) =>
+    setConfirm({
+      open: true,
+      title: "확인",
+      message: "진행하시겠습니까?",
+      acceptText: "진행",
+      rejectText: "취소",
+      showUser: false,
+      user: null,
+      onAccept: null,
+      onReject: null,
+      ...opts,
+    });
 
   // ====== 슬롯 애니메이션 관련 ======
   const PLACEHOLDER_COUNT = 3;
@@ -148,10 +168,17 @@ export default function Matching() {
   };
   useEffect(() => () => stopPreSpin(), []);
 
-  // ====== 매칭 시작 ======
+  // ====== 매칭 시작 (실행 함수) ======
   const MIN_SPIN_MS = 1800;
 
   const startMatching = async () => {
+    // ✅ 안전망: 크레딧 재확인
+    const creditsNow = user?.matchCredits ?? 0;
+    if (creditsNow <= 0) {
+      alert("매칭 기회가 없습니다!");
+      return;
+    }
+
     setLoading(true);
     setMessage("매칭 시작 중...");
     startPreSpin();
@@ -189,6 +216,26 @@ export default function Matching() {
       stopPreSpin();
       setLoading(false);
     }
+  };
+
+  // ✅ 컨펌 열기
+  const openStartMatchingConfirm = () => {
+    const credits = user?.matchCredits ?? 0;
+    if (credits <= 0) {
+      alert("매칭 기회가 없습니다!");
+      return;
+    }
+    openConfirm({
+      title: "매칭 확인",
+      message: `매칭 기회 1회를 사용하여 후보를 받아옵니다.\n현재 보유: ${credits}회\n진행하시겠습니까?`,
+      acceptText: "진행",
+      rejectText: "취소",
+      onAccept: async () => {
+        setConfirm(null);
+        await startMatching();
+      },
+      onReject: () => setConfirm(null),
+    });
   };
 
   // ✅ 결과 분기 처리
@@ -236,7 +283,7 @@ export default function Matching() {
           <button
             type="button"
             className="cta-btn"
-            onClick={startMatching}
+            onClick={openStartMatchingConfirm}  // ✅ 컨펌 후 실행
             disabled={loading}
           >
             {loading ? "매칭 시작 중..." : "매칭하기"}
@@ -248,6 +295,31 @@ export default function Matching() {
           </p>
         )}
       </div>
+
+      {/* ✅ 공통 컨펌 모달 */}
+      {confirm?.open && (
+        <ConfirmModal
+          open
+          onClose={() => setConfirm(null)}
+          onAccept={async () => {
+            try {
+              await confirm.onAccept?.();
+            } finally {
+              setConfirm((prev) => (prev?.open ? null : prev));
+            }
+          }}
+          onReject={() => {
+            confirm.onReject?.();
+            setConfirm(null);
+          }}
+          title={confirm.title}
+          message={confirm.message}
+          acceptText={confirm.acceptText}
+          rejectText={confirm.rejectText}
+          showUser={confirm.showUser}
+          user={confirm.user}
+        />
+      )}
     </div>
   );
 }

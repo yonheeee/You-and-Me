@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import "../../css/home/FlirtingTabs.css";
 import SentSignalList from "./SentSignalList";
 import ReceiveSignal from "./ReceiveSignal";
-import Accept from "./Accept";
+import ConfirmModal from "../common/ConfirmModal.jsx"; // ✅ 변경
 import Modal from "../common/Modal";
 import YouProfile from "../mypage/YouProfile";
 import api from "../../api/axios.js";
@@ -107,9 +107,8 @@ export default function FlirtingTabs() {
   const acceptSignal = async (signalId) => {
     try {
       await api.post(`/signals/accept/${signalId}`);
-      fetchReceivedSignals();
-      fetchSentSignals();
-      setOpenModal(false);
+      await Promise.all([fetchReceivedSignals(), fetchSentSignals()]);
+      setOpenModal(false); // ✅ 수락 후 닫기
     } catch (err) {
       console.error("❌ 신호 수락 실패:", err);
     }
@@ -118,7 +117,7 @@ export default function FlirtingTabs() {
   const declineSignal = async (signalId) => {
     try {
       await api.post(`/signals/decline/${signalId}`);
-      fetchReceivedSignals();
+      await fetchReceivedSignals();
     } catch (err) {
       console.error("❌ 신호 거절 실패:", err);
     }
@@ -131,6 +130,17 @@ export default function FlirtingTabs() {
 
   // signal + match 합산 뱃지
   const unreadSignalCount = (unread.signal ?? 0) + (unread.match ?? 0);
+
+  // ✅ 모달 핸들러: 거절 시에도 모달 닫힘
+  const handleModalAccept = () => {
+    if (!openModal?.signalId) return;
+    acceptSignal(openModal.signalId);
+  };
+  const handleModalReject = async () => {
+    if (!openModal?.signalId) return;
+    await declineSignal(openModal.signalId);
+    setOpenModal(false); // ✅ 거절 후 닫기
+  };
 
   return (
     <div className="flirting-tabs">
@@ -173,11 +183,15 @@ export default function FlirtingTabs() {
       </div>
 
       {openModal && (
-        <Accept
+        <ConfirmModal
           open={true}
           onClose={() => setOpenModal(false)}
-          onAccept={() => acceptSignal(openModal.signalId)}
-          onReject={() => declineSignal(openModal.signalId)}
+          onAccept={handleModalAccept}
+          onReject={handleModalReject}
+          title="플러팅 확인"                                
+          message={`${openModal?.fromUser?.name ?? "상대"}님의 플러팅을 수락하시겠습니까?`}
+          acceptText="수락"
+          rejectText="거절"
           user={{
             name: openModal.fromUser?.name,
             department: openModal.fromUser?.department,

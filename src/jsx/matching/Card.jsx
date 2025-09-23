@@ -7,6 +7,7 @@ import "../../css/matching/Card.css";
 import starImg from "../../image/matching/star.svg";
 import useUserStore from "../../api/userStore";
 import YouProfile from "../mypage/YouProfile.jsx";
+import ConfirmModal from "../common/ConfirmModal.jsx"; // ✅ 공통 컨펌 모달
 
 const FIXED_STARS = [
   { id: 0, left: 26, top: 10, size: 100, rot: 0, op: 0.55 },
@@ -34,6 +35,23 @@ export default function Card({ initialCandidates = [] }) {
   const { user } = useUserStore();
   const [selectedUserId, setSelectedUserId] = useState(null);
 
+  // ✅ 공통 컨펌 모달 상태
+  const [confirm, setConfirm] = useState(null);
+  const openConfirm = (opts) =>
+    setConfirm({
+      open: true,
+      title: "확인",
+      message: "진행하시겠습니까?",
+      acceptText: "확인",
+      rejectText: "취소",
+      showUser: false,
+      user: null,
+      onAccept: null,
+      onReject: null,
+      ...opts,
+    });
+
+  // 카드 가로 스와이프 상태
   const [center, setCenter] = useState(0);
   const centerRef = useRef(center);
   useEffect(() => {
@@ -126,8 +144,8 @@ export default function Card({ initialCandidates = [] }) {
     }, SNAP_MS);
   };
 
-  // 다시 매칭: API로 새 목록 교체(크레딧 차감은 서버에 맡기고, 성공 후 프로필 재조회)
-  const handleRematch = async () => {
+  // ✅ 다시 매칭 시작 (API)
+  const doRematch = async () => {
     const credits = user?.matchCredits ?? 0;
     if (credits <= 0) {
       alert("매칭 기회가 없습니다!");
@@ -168,6 +186,61 @@ export default function Card({ initialCandidates = [] }) {
     }
   };
 
+  // ✅ 다시 매칭 컨펌 열기
+  const openRematchConfirm = () => {
+    const credits = user?.matchCredits ?? 0;
+    if (credits <= 0) {
+      alert("매칭 기회가 없습니다!");
+      return;
+    }
+    openConfirm({
+      title: "다시 매칭하기",
+      message: `매칭 기회 1회를 사용하여 새로운 후보를 받습니다.\n현재 보유: ${credits}회\n진행하시겠습니까?`,
+      acceptText: "진행",
+      rejectText: "취소",
+      onAccept: async () => {
+        setConfirm(null);
+        await doRematch();
+      },
+      onReject: () => setConfirm(null),
+    });
+  };
+
+  // ✅ 플러팅 전송
+  const sendFlirt = async (targetUserId) => {
+    try {
+      await api.post(`/signals/${targetUserId}`);
+      alert("플러팅을 보냈어요!");
+      // 필요 시 여기에서 받은/보낸 신호 목록 갱신 이벤트 디스패치 가능
+      // window.dispatchEvent(new CustomEvent("rt:signal", { detail: {...} }));
+    } catch (err) {
+      console.error("❌ 플러팅 전송 실패:", err);
+      alert(err?.response?.data?.message || "플러팅을 보낼 수 없습니다.");
+    }
+  };
+
+  // ✅ 프로필에서 '플러팅하기' 요청 받기 (YouProfile에서 호출)
+  const handleRequestFlirt = (targetUserId, targetName, avatar) => {
+    if (!targetUserId) return;
+    openConfirm({
+      title: "플러팅 확인",
+      message: `${targetName ?? "상대"}님께 플러팅을 보내시겠습니까?`,
+      acceptText: "보내기",
+      rejectText: "취소",
+      showUser: !!(targetName || avatar),
+      user: targetName
+        ? { name: targetName, avatar }
+        : null,
+      onAccept: async () => {
+        setConfirm(null);
+        await sendFlirt(targetUserId);
+        // 전송 후 프로필 닫기 원하면 아래 주석 해제
+        // setSelectedUserId(null);
+      },
+      onReject: () => setConfirm(null),
+    });
+  };
+
   // 카드 내부 렌더
   const breakAtHalf = (text) => {
     const raw = (text ?? "").trim();
@@ -190,7 +263,6 @@ export default function Card({ initialCandidates = [] }) {
     return arr.slice(0, idx).join("") + "\n" + arr.slice(idx).join("");
   };
 
-  // ⬇️ Card.jsx 안의 CardBody 만 이 코드로 교체
   const CardBody = ({ item = {} }) => {
     const {
       name = "이름 없음",
@@ -200,26 +272,21 @@ export default function Card({ initialCandidates = [] }) {
       typeImageUrl, // ✅ 2순위
     } = item;
 
-    // 소개 줄바꿈 기존 로직 재사용
     const msgText = breakAtHalf(introduce ?? "");
 
-    // 이미지 소스 우선순위 + 에러 폴백
     const primary = (profileImageUrl ?? "").trim() || null;
     const fallback = (typeImageUrl ?? "").trim() || null;
 
     const [imgSrc, setImgSrc] = useState(primary || fallback || null);
     useEffect(() => {
-      // item 바뀌면 우선순위 다시 계산
       setImgSrc(primary || fallback || null);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [primary, fallback]);
 
     const handleImgError = () => {
       if (imgSrc && imgSrc !== fallback && fallback) {
-        // 프로필(1순위) 실패 → 타입이미지(2순위)로 교체
         setImgSrc(fallback);
       } else {
-        // 둘 다 실패 → 플레이스홀더
         setImgSrc(null);
       }
     };
@@ -260,10 +327,7 @@ export default function Card({ initialCandidates = [] }) {
               onError={handleImgError}
             />
           ) : (
-            // ✅ 이미지가 전혀 없거나 모두 실패했을 때
-            <div className="img-placeholder" aria-hidden="true">
-              {/* 필요하면 이 안에 아이콘/이니셜 등 넣어도 됨 */}
-            </div>
+            <div className="img-placeholder" aria-hidden="true" />
           )}
         </div>
 
@@ -442,7 +506,7 @@ export default function Card({ initialCandidates = [] }) {
           <button
             type="button"
             className="cta-btn"
-            onClick={handleRematch}
+            onClick={openRematchConfirm}   // ✅ 컨펌 후 진행
             disabled={loading}
           >
             {loading ? "매칭 시작 중..." : "다시 매칭하기"}
@@ -450,7 +514,7 @@ export default function Card({ initialCandidates = [] }) {
         </div>
       </div>
 
-      {/* 상세 모달: 프로필 + 플러팅하기 버튼 */}
+      {/* 상세 모달: 프로필 + 플러팅하기 콜백 */}
       {selectedUserId != null &&
         createPortal(
           <div
@@ -462,11 +526,41 @@ export default function Card({ initialCandidates = [] }) {
                 userId={selectedUserId}
                 onClose={() => setSelectedUserId(null)}
                 fromMatching={true}
+                // ✅ 프로필 내부의 "플러팅하기" 버튼에서 호출
+                onRequestFlirt={(targetId, targetName, avatar) =>
+                  handleRequestFlirt(targetId, targetName, avatar)
+                }
               />
             </div>
           </div>,
           document.body
         )}
+
+      {/* ✅ 공통 컨펌 모달 */}
+      {confirm?.open && (
+        <ConfirmModal
+          open
+          onClose={() => setConfirm(null)}
+          onAccept={async () => {
+            try {
+              await confirm.onAccept?.();
+            } finally {
+              // onAccept 내부에서 닫지 않았다면 여기서 닫기
+              setConfirm((prev) => (prev?.open ? null : prev));
+            }
+          }}
+          onReject={() => {
+            confirm.onReject?.();
+            setConfirm(null);
+          }}
+          title={confirm.title}
+          message={confirm.message}
+          acceptText={confirm.acceptText}
+          rejectText={confirm.rejectText}
+          showUser={confirm.showUser}
+          user={confirm.user}
+        />
+      )}
     </>
   );
 }
