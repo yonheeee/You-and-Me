@@ -1,4 +1,3 @@
-// src/jsx/matching/Card.jsx
 import React, { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import api from "../../api/axios.js";
@@ -88,6 +87,9 @@ export default function Card({ initialCandidates = [] }) {
   const hasTwo = N === 2;
   const hasThreePlus = N >= 3;
 
+  // ✅ 스와이프 허용 여부(3장 이상일 때만 허용)
+  const swipeEnabled = hasThreePlus;
+
   const TWO_MULT = 0.5;
   const xTwoLeft = -SPREAD * TWO_MULT + dx;
   const xTwoRight = SPREAD * TWO_MULT + dx;
@@ -95,7 +97,7 @@ export default function Card({ initialCandidates = [] }) {
 
   // 드래그
   const onStart = (x) => {
-    if (hasOne) return;
+    if (!swipeEnabled) return;
     dragging.current = true;
     movedRef.current = false;
     setSnapping(false);
@@ -103,7 +105,7 @@ export default function Card({ initialCandidates = [] }) {
     lastX.current = x;
   };
   const onMove = (x) => {
-    if (!dragging.current) return;
+    if (!dragging.current || !swipeEnabled) return;
     const delta = x - lastX.current;
     lastX.current = x;
     setDx((prev) => {
@@ -113,7 +115,7 @@ export default function Card({ initialCandidates = [] }) {
     });
   };
   const onEnd = () => {
-    if (!dragging.current) return;
+    if (!dragging.current || !swipeEnabled) return;
     dragging.current = false;
     const absDx = Math.abs(dx);
     const sign = dx < 0 ? -1 : 1;
@@ -128,7 +130,7 @@ export default function Card({ initialCandidates = [] }) {
     }, SNAP_MS);
   };
   const completeSlide = (sign) => {
-    if (N <= 1) return;
+    if (!swipeEnabled) return;
     setSnapping(true);
     setDir(sign < 0 ? "dir-left" : "dir-right");
     setDx(sign * SPREAD);
@@ -211,8 +213,6 @@ export default function Card({ initialCandidates = [] }) {
     try {
       await api.post(`/signals/${targetUserId}`);
       alert("플러팅을 보냈어요!");
-      // 필요 시 여기에서 받은/보낸 신호 목록 갱신 이벤트 디스패치 가능
-      // window.dispatchEvent(new CustomEvent("rt:signal", { detail: {...} }));
     } catch (err) {
       console.error("❌ 플러팅 전송 실패:", err);
       alert(err?.response?.data?.message || "플러팅을 보낼 수 없습니다.");
@@ -228,14 +228,10 @@ export default function Card({ initialCandidates = [] }) {
       acceptText: "보내기",
       rejectText: "취소",
       showUser: !!(targetName || avatar),
-      user: targetName
-        ? { name: targetName, avatar }
-        : null,
+      user: targetName ? { name: targetName, avatar } : null,
       onAccept: async () => {
         setConfirm(null);
         await sendFlirt(targetUserId);
-        // 전송 후 프로필 닫기 원하면 아래 주석 해제
-        // setSelectedUserId(null);
       },
       onReject: () => setConfirm(null),
     });
@@ -370,13 +366,20 @@ export default function Card({ initialCandidates = [] }) {
       <div className="card-root">
         <div
           className={`card-wrap ${snapping ? "snapping" : ""} ${dir}`}
-          onTouchStart={(e) => !hasOne && onStart(e.touches[0].clientX)}
-          onTouchMove={(e) => !hasOne && onMove(e.touches[0].clientX)}
-          onTouchEnd={onEnd}
-          onMouseDown={(e) => !hasOne && onStart(e.clientX)}
-          onMouseMove={(e) => !hasOne && onMove(e.clientX)}
-          onMouseUp={onEnd}
-          onMouseLeave={onEnd}
+          /* ✅ 캡처 단계에서 제스처 처리 + 3장 이상일 때만 동작 */
+          onTouchStartCapture={(e) =>
+            swipeEnabled && onStart(e.touches[0].clientX)
+          }
+          onTouchMoveCapture={(e) => {
+            if (!swipeEnabled) return;
+            onMove(e.touches[0].clientX);
+            if (dragging.current) e.preventDefault();
+          }}
+          onTouchEndCapture={swipeEnabled ? onEnd : undefined}
+          onMouseDownCapture={(e) => swipeEnabled && onStart(e.clientX)}
+          onMouseMoveCapture={(e) => swipeEnabled && onMove(e.clientX)}
+          onMouseUpCapture={swipeEnabled ? onEnd : undefined}
+          onMouseLeaveCapture={swipeEnabled ? onEnd : undefined}
         >
           {/* === N=1 === */}
           {hasOne && (
@@ -386,16 +389,13 @@ export default function Card({ initialCandidates = [] }) {
                 transform: `translate(calc(-50% + ${xCenter}px), -50%)`,
               }}
             >
-              <div
-                className="card"
-                onClick={handleCardClick(candidates[center])}
-              >
+              <div className="card" onClick={handleCardClick(candidates[center])}>
                 <CardBody item={candidates[center]} />
               </div>
             </div>
           )}
 
-          {/* === N=2 === */}
+          {/* === N=2 === (스와이프 비활성) */}
           {hasTwo && (
             <>
               <div
@@ -405,10 +405,7 @@ export default function Card({ initialCandidates = [] }) {
                   zIndex: 2,
                 }}
               >
-                <div
-                  className="card"
-                  onClick={handleCardClick(candidates[center])}
-                >
+                <div className="card" onClick={handleCardClick(candidates[center])}>
                   <CardBody item={candidates[center]} />
                 </div>
               </div>
@@ -419,17 +416,14 @@ export default function Card({ initialCandidates = [] }) {
                   zIndex: 1,
                 }}
               >
-                <div
-                  className="card"
-                  onClick={handleCardClick(candidates[otherIdx])}
-                >
+                <div className="card" onClick={handleCardClick(candidates[otherIdx])}>
                   <CardBody item={candidates[otherIdx]} />
                 </div>
               </div>
             </>
           )}
 
-          {/* === N>=3 === */}
+          {/* === N>=3 === (스와이프 활성) */}
           {hasThreePlus && (
             <>
               <div
@@ -451,10 +445,7 @@ export default function Card({ initialCandidates = [] }) {
                   transform: `translate(calc(-50% + ${xLeft}px), -50%)`,
                 }}
               >
-                <div
-                  className="card"
-                  onClick={handleCardClick(candidates[idxLeft])}
-                >
+                <div className="card" onClick={handleCardClick(candidates[idxLeft])}>
                   <CardBody item={candidates[idxLeft]} />
                 </div>
               </div>
@@ -464,10 +455,7 @@ export default function Card({ initialCandidates = [] }) {
                   transform: `translate(calc(-50% + ${xCenter}px), -50%)`,
                 }}
               >
-                <div
-                  className="card"
-                  onClick={handleCardClick(candidates[center])}
-                >
+                <div className="card" onClick={handleCardClick(candidates[center])}>
                   <CardBody item={candidates[center]} />
                 </div>
               </div>
@@ -477,10 +465,7 @@ export default function Card({ initialCandidates = [] }) {
                   transform: `translate(calc(-50% + ${xRight}px), -50%)`,
                 }}
               >
-                <div
-                  className="card"
-                  onClick={handleCardClick(candidates[idxRight])}
-                >
+                <div className="card" onClick={handleCardClick(candidates[idxRight])}>
                   <CardBody item={candidates[idxRight]} />
                 </div>
               </div>
@@ -506,7 +491,7 @@ export default function Card({ initialCandidates = [] }) {
           <button
             type="button"
             className="cta-btn"
-            onClick={openRematchConfirm}   // ✅ 컨펌 후 진행
+            onClick={openRematchConfirm} // ✅ 컨펌 후 진행
             disabled={loading}
           >
             {loading ? "매칭 시작 중..." : "다시 매칭하기"}
@@ -517,16 +502,12 @@ export default function Card({ initialCandidates = [] }) {
       {/* 상세 모달: 프로필 + 플러팅하기 콜백 */}
       {selectedUserId != null &&
         createPortal(
-          <div
-            className="modal-overlay"
-            onClick={() => setSelectedUserId(null)}
-          >
+          <div className="modal-overlay" onClick={() => setSelectedUserId(null)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <YouProfile
                 userId={selectedUserId}
                 onClose={() => setSelectedUserId(null)}
                 fromMatching={true}
-                // ✅ 프로필 내부의 "플러팅하기" 버튼에서 호출
                 onRequestFlirt={(targetId, targetName, avatar) =>
                   handleRequestFlirt(targetId, targetName, avatar)
                 }
@@ -545,7 +526,6 @@ export default function Card({ initialCandidates = [] }) {
             try {
               await confirm.onAccept?.();
             } finally {
-              // onAccept 내부에서 닫지 않았다면 여기서 닫기
               setConfirm((prev) => (prev?.open ? null : prev));
             }
           }}
