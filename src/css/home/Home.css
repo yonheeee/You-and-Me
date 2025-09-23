@@ -212,6 +212,7 @@
 /* ===== Credits (FAQ 톤 박스) ===== */
 .credits-section {
   padding: 1.5rem 1.6rem;
+  padding-bottom: -3rem;
 }
 
 .credits-card {
