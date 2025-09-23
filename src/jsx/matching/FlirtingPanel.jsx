@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import api from "../../api/axios.js";
 import useUserStore from "../../api/userStore.js";
 import "../../css/signup/ResultPage.css";
+import ConfirmModal from "../common/ConfirmModal.jsx"; // ✅ 공통 컨펌 모달
 
 export default function FlirtingPanel({ targetUserId, onSent }) {
   const [alreadySent, setAlreadySent] = useState(false);
@@ -10,6 +11,22 @@ export default function FlirtingPanel({ targetUserId, onSent }) {
 
   // ✅ 필요한 값만 각각 구독 (객체 리턴 X)
   const signalCredits = useUserStore((s) => s.user?.signalCredits ?? 0);
+
+  // ✅ 컨펌 상태
+  const [confirm, setConfirm] = useState(null);
+  const openConfirm = (opts) =>
+    setConfirm({
+      open: true,
+      title: "플러팅 확인",
+      message: "플러팅을 보내시겠습니까?\n신호 1회가 차감됩니다.",
+      acceptText: "보내기",
+      rejectText: "취소",
+      showUser: false,
+      user: null,
+      onAccept: null,
+      onReject: null,
+      ...opts,
+    });
 
   // ✅ 마운트/targetUserId 변경시에만 상태 조회
   useEffect(() => {
@@ -26,7 +43,6 @@ export default function FlirtingPanel({ targetUserId, onSent }) {
         if (cancelled) return;
 
         const next = resp?.data?.alreadySent === true;
-        // 값이 바뀔 때만 set → 루프 방지
         setAlreadySent((prev) => (prev === next ? prev : next));
       } catch (err) {
         if (cancelled) return;
@@ -51,16 +67,15 @@ export default function FlirtingPanel({ targetUserId, onSent }) {
     };
   }, [targetUserId]);
 
-  const handleSend = useCallback(async () => {
+  // ✅ 실제 전송 함수 (컨펌 수락 시 호출)
+  const doSend = useCallback(async () => {
     if (!targetUserId || alreadySent || loading) return;
 
+    // 안전망: 크레딧 재확인
     if (signalCredits <= 0) {
       alert("신호 기회가 없습니다! 부스 쿠폰 등록 시 추가됩니다.");
       return;
     }
-
-    if (!window.confirm("플러팅을 보내시겠습니까?\n신호 1회가 차감됩니다."))
-      return;
 
     try {
       setLoading(true);
@@ -95,11 +110,29 @@ export default function FlirtingPanel({ targetUserId, onSent }) {
     }
   }, [targetUserId, alreadySent, loading, signalCredits, onSent]);
 
+  // ✅ 버튼 클릭 → 컨펌 모달 오픈
+  const handleOpenConfirm = () => {
+    if (!targetUserId || alreadySent || loading) return;
+
+    if (signalCredits <= 0) {
+      alert("신호 기회가 없습니다! 부스 쿠폰 등록 시 추가됩니다.");
+      return;
+    }
+
+    openConfirm({
+      onAccept: async () => {
+        setConfirm(null);
+        await doSend();
+      },
+      onReject: () => setConfirm(null),
+    });
+  };
+
   return (
     <div className="flirting-panel">
       <button
         className={`flirting-cta ${alreadySent ? "done" : ""}`}
-        onClick={handleSend}
+        onClick={handleOpenConfirm}              
         disabled={alreadySent || loading}
         type="button"
       >
@@ -114,6 +147,31 @@ export default function FlirtingPanel({ targetUserId, onSent }) {
           <li>쿠폰 혜택: 쿠폰 등록 시 각 5회씩 추가됩니다.</li>
         </ul>
       </div>
+
+      {/* ✅ 공통 컨펌 모달 */}
+      {confirm?.open && (
+        <ConfirmModal
+          open
+          onClose={() => setConfirm(null)}
+          onAccept={async () => {
+            try {
+              await confirm.onAccept?.();
+            } finally {
+              setConfirm((prev) => (prev?.open ? null : prev));
+            }
+          }}
+          onReject={() => {
+            confirm.onReject?.();
+            setConfirm(null);
+          }}
+          title={confirm.title}
+          message={confirm.message}
+          acceptText={confirm.acceptText}
+          rejectText={confirm.rejectText}
+          showUser={confirm.showUser}
+          user={confirm.user}
+        />
+      )}
     </div>
   );
 }

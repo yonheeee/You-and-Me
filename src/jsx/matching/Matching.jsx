@@ -40,8 +40,8 @@ export default function Matching() {
     setConfirm({
       open: true,
       title: "확인",
-      message: "진행하시겠습니까?",
-      acceptText: "진행",
+      message: "매칭하시겠습니까?",
+      acceptText: "매칭시작",
       rejectText: "취소",
       showUser: false,
       user: null,

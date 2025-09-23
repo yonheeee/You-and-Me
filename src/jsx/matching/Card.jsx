@@ -42,7 +42,7 @@ export default function Card({ initialCandidates = [] }) {
       open: true,
       title: "확인",
       message: "진행하시겠습니까?",
-      acceptText: "확인",
+      acceptText: "매칭하기",
       rejectText: "취소",
       showUser: false,
       user: null,
