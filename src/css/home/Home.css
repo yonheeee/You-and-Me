@@ -247,13 +247,14 @@
 
 .credits-item {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 0.7rem;
   padding: 1rem 1.2rem;
   border-radius: 1.2rem;
   background: rgba(255, 90, 145, 0.05);
 }
 
+/* 라벨 */
 .credits-label {
   flex: 0 0 4.2rem; /* 라벨 고정폭 */
   font-size: 0.8rem;
@@ -261,9 +262,23 @@
   color: #ff5a91;
 }
 
+/* dd 묶음 (세로로) */
+.credits-info {
+  display: flex;
+  flex-direction: column;  /* ✅ 세로 쌓기 */
+  gap: 0.3rem;
+  flex: 1;                 /* 남은 공간 차지 */
+}
+
+.credit-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
 .credits-value {
-  margin: 0;
-  font-size: 0.8em;
+  font-size: 1rem;
+  font-weight: 500;
   color: #374151;
 }
 
@@ -276,20 +291,6 @@
   background: #ffffff; /* 투명 PNG 대비 */
   padding: 0.3rem;
   box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.08);
-}
-
-/* 기존 credits 스타일 아래 이어서 추가 */
-
-.credits-item {
-  display: flex;
-  align-items: center; /* 아이콘 수직정렬 */
-  gap: 1.2rem;
-}
-
-.credits-value {
-  margin: 0;
-  color: #374151;
-  flex: 1; /* 텍스트가 남은 공간 차지 → 아이콘은 우측으로 */
 }
 
 /* 우측 인스타 아이콘 버튼 */
@@ -306,9 +307,11 @@
   color: #ff5a91; /* 아이콘 색 (svg는 currentColor) */
   transition: filter 120ms ease, background 120ms ease, transform 80ms ease;
 }
+
 .credits-ig:active {
   transform: translateY(0.1rem);
 }
+
 .credits-ig:focus-visible {
   outline: 0.2rem solid #ff5a91;
   outline-offset: 0.2rem;

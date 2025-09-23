@@ -122,9 +122,14 @@ function Home() {
                 <dl className="credits-list">
                   {TEAM.map((m) => (
                     <div className="credits-item" key={m.role}>
+                      {/* 라벨 */}
                       <dt className="credits-label">{m.role}</dt>
-                      <dd className="credit-value">{m.major}</dd>
-                      <dd className="credits-value">{m.person}</dd>
+
+                      {/* dd 묶음 */}
+                      <div className="credits-info">
+                        <dd className="credit-value">{m.major}</dd>
+                        <dd className="credits-value">{m.person}</dd>
+                      </div>
 
                       {/* 우측 인스타 아이콘 */}
                       {m.ig && (
