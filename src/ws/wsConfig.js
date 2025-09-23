@@ -1,5 +1,5 @@
 // src/ws/wsConfig.js
-export const WS_URL = "https://api.likelionhsu.co.kr/api/ws";
+export const WS_URL = process.env.REACT_APP_WS_URL;
 
 export const USER_DEST_PREFIX = "/user";
 export const BROKER_DEST_PREFIX = "/queue";
