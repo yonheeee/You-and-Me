@@ -85,8 +85,8 @@
 
 .confirm-profile-img,
 .confirm-profile-placeholder {
-  width: 3rem;
-  height: 3rem;
+  width: 8rem;
+  height: 8rem;
   border-radius: 50%;
   display: block;
   margin: 0 auto 1.2rem;
@@ -101,7 +101,7 @@
 /* Skeleton placeholder */
 .confirm-profile-placeholder {
   background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%);
-  background-size: 400% 100%;
+  background-size: 100% 100%;
   animation: cm-shimmer 1.4s ease infinite;
 }
 @keyframes cm-shimmer {
