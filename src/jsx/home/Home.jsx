@@ -82,27 +82,6 @@ function Home() {
               </div>
             </section>
 
-            {/* Q&A 버튼 */}
-            <section className="QandA">
-              <button
-                className="QandA-btn"
-                onClick={() => setIsPopupOpen(true)}
-                type="button"
-              >
-                <div className="QandA-text">
-                  <div
-                    className="Q-title"
-                    style={{ fontSize: "20px", fontWeight: "bold" }}
-                  >
-                    FAQ
-                  </div>
-                  <div className="Q-subtitle" style={{ fontSize: "14px" }}>
-                    자주 묻는 질문 및 개인정보 처리방침
-                  </div>
-                </div>
-                <img src={QandA} alt="큐엔에이 이미지" />
-              </button>
-            </section>
             {/* 팀 크레딧 박스 */}
             <section className="credits-section">
               <div className="credits-card">
@@ -135,6 +114,28 @@ function Home() {
                   </div>
                 </dl>
               </div>
+            </section>
+
+            {/* Q&A 버튼 */}
+            <section className="QandA">
+              <button
+                className="QandA-btn"
+                onClick={() => setIsPopupOpen(true)}
+                type="button"
+              >
+                <div className="QandA-text">
+                  <div
+                    className="Q-title"
+                    style={{ fontSize: "20px", fontWeight: "bold" }}
+                  >
+                    FAQ
+                  </div>
+                  <div className="Q-subtitle" style={{ fontSize: "14px" }}>
+                    자주 묻는 질문 및 개인정보 처리방침
+                  </div>
+                </div>
+                <img src={QandA} alt="큐엔에이 이미지" />
+              </button>
             </section>
 
             {/* 팝업 */}
