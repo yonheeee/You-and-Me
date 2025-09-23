@@ -151,11 +151,10 @@
 }
 
 /* Q&A 버튼 섹션 */
-.QandA {
+.QandA-home {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: -4rem;
   padding-bottom: 5rem;
 }
 
@@ -212,7 +211,6 @@
 /* ===== Credits (FAQ 톤 박스) ===== */
 .credits-section {
   padding: 1.5rem 1.6rem;
-  padding-bottom: -3rem;
 }
 
 .credits-card {

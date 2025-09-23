@@ -122,7 +122,7 @@ function Home() {
             </section>
 
             {/* Q&A 버튼 */}
-            <section className="QandA">
+            <section className="QandA-home">
               <button
                 className="QandA-btn"
                 onClick={() => setIsPopupOpen(true)}
