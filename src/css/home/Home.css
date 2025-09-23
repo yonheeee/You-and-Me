@@ -249,7 +249,7 @@
 .credits-item {
   display: flex;
   align-items: baseline;
-  gap: 1.2rem;
+  gap: 0.7rem;
   padding: 1rem 1.2rem;
   border-radius: 1.2rem;
   background: rgba(255, 90, 145, 0.05);
