@@ -20,7 +20,7 @@ function mapDeptRanking(apiItems = []) {
 function mapMbtiRanking(apiItems = []) {
   return apiItems.slice(0, 10).map((it) => ({
     id: it.rank ?? it.mbti ?? Math.random(),
-    deptName: it.mbti ?? "-",
+    deptName: it.mbti ?? "-", // UI 공통 필드 사용
     count: it.count ?? 0,
     imageUrl: it.imageUrl ?? "",
     rank: it.rank ?? null,
@@ -60,8 +60,7 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
           noAuth: true,
         });
         const arr = Array.isArray(res.data) ? res.data : [];
-        const mapped =
-          mode === "dept" ? mapDeptRanking(arr) : mapMbtiRanking(arr);
+        const mapped = mode === "dept" ? mapDeptRanking(arr) : mapMbtiRanking(arr);
         setItems(mapped);
       } catch (e) {
         if (!controller.signal.aborted) {
@@ -90,9 +89,9 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
   }, [items]);
 
   const fade = {
-    initial: { opacity: 0, y: 10 }, // 아래에서 올라옴
+    initial: { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0, transition: { duration: 0.35 } },
-    exit: { opacity: 0, y: -10, transition: { duration: 0.25 } }, // 위로 사라짐
+    exit: { opacity: 0, y: -10, transition: { duration: 0.25 } },
   };
 
   return (
@@ -110,22 +109,21 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
           </button>
         </div>
 
-        {/* ✅ 1,2,3등 프로필 (crossfade 애니메이션) */}
-        <div className="podium-heads" aria-label="상위 3위">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`${mode}-${activeTab}-top3`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { duration: 0.35 } }}
-              exit={{ opacity: 0, transition: { duration: 0.25 } }}
-              style={{ display: "flex" }}
-            >
-              {top3[1] && <PodiumHead rank={2} item={top3[1]} />}
-              {top3[0] && <PodiumHead rank={1} item={top3[0]} highlight />}
-              {top3[2] && <PodiumHead rank={3} item={top3[2]} />}
-            </motion.div>
-          </AnimatePresence>
-        </div>
+        {/* 1,2,3등 프로필 (fade 애니메이션) */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            className="podium-heads"
+            aria-label="상위 3위"
+            key={`${mode}-${activeTab}-top3`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.35 } }}
+            exit={{ opacity: 0, transition: { duration: 0.25 } }}
+          >
+            {top3[1] && <PodiumHead rank={2} item={top3[1]} />}
+            {top3[0] && <PodiumHead rank={1} item={top3[0]} highlight />}
+            {top3[2] && <PodiumHead rank={3} item={top3[2]} />}
+          </motion.div>
+        </AnimatePresence>
 
         {/* 시상대 */}
         <div className="podium">
@@ -153,7 +151,7 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
       {/* ===== 하단: 탭 + 랭킹 리스트 ===== */}
       <AnimatePresence mode="wait">
         <motion.section
-          key={`${mode}-${activeTab}`} // ✅ 모드/탭 전환 시 전환 애니메이션
+          key={`${mode}-${activeTab}`} 
           className="rank-list-wrap"
           {...fade}
         >
