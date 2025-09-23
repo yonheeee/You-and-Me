@@ -1,6 +1,6 @@
 import "../../css/home/Home.css";
 import FlirtingTabs from "./FlirtingTabs";
-import Logo from "../../image/loginPage/logo.svg";
+import Logo from "../../image/loginPage/logo2.png";
 import MatchingBanner from "../../image/home/match.svg";
 import Map from "../../image/home/map.png";
 import MapInfo from "../../image/home/mapinfo.png";
