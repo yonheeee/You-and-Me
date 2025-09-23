@@ -35,17 +35,20 @@ function Home() {
   const TEAM = [
     {
       role: "디자인",
-      person: "시각디자인학과 23 문지원",
+      major: "시각디자인학과",
+      person: " 23 문지원",
       ig: "https://instagram.com/문지원_아이디",
     },
     {
       role: "프론트엔드",
-      person: "항공소프트웨어공학과 22 김형석",
+      major: "항공소프트웨어공학과",
+      person: "22 김형석",
       ig: "https://instagram.com/김형석_아이디",
     },
     {
       role: "백엔드",
-      person: "항공소프트웨어공학과 22 박찬우",
+      major: "항공소프트웨어공학과",
+      person: "22 박찬우",
       ig: "https://instagram.com/박찬우_아이디",
     },
   ];
@@ -120,6 +123,7 @@ function Home() {
                   {TEAM.map((m) => (
                     <div className="credits-item" key={m.role}>
                       <dt className="credits-label">{m.role}</dt>
+                      <dd className="credit-value">{m.major}</dd>
                       <dd className="credits-value">{m.person}</dd>
 
                       {/* 우측 인스타 아이콘 */}
