@@ -14,23 +14,12 @@
   --cm-shadow: 0 2rem 5rem rgba(0,0,0,0.2);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --cm-backdrop: rgba(0, 0, 0, 0.6);
-    --cm-bg: #111214;
-    --cm-text: #f3f4f6;
-    --cm-muted: #9ca3af;
-    --cm-border: #26272b;
-    --cm-reject: #6b7280;
-  }
-}
-
 /* ===== Overlay ===== */
 .confirm-overlay,
 .accept-overlay {
   position: fixed;
   inset: 0;
-  z-index: var(--cm-z);
+  z-index: 10000;
   background: var(--cm-backdrop);
   display: grid;
   place-items: center;
@@ -141,6 +130,7 @@
   margin-top: 1.2rem;
   font-size: 1.1rem;
   line-height: 1.5;
+  white-space: pre-line;
 }
 
 /* ===== Actions ===== */

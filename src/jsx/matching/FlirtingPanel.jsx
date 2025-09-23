@@ -18,7 +18,7 @@ export default function FlirtingPanel({ targetUserId, onSent }) {
     setConfirm({
       open: true,
       title: "플러팅 확인",
-      message: "플러팅을 보내시겠습니까?\n신호 1회가 차감됩니다.",
+      message: "플러팅을 보내시겠습니까?\n플러팅 1회가 차감됩니다.",
       acceptText: "보내기",
       rejectText: "취소",
       showUser: false,
