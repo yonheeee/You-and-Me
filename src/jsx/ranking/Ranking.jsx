@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
-import { motion } from "framer-motion"; // ✅ fade-in용
+import { motion, AnimatePresence } from "framer-motion";
 import "../../css/ranking/Ranking.css";
 import King from "../../image/ranking/king.svg";
 
@@ -60,8 +60,7 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
           noAuth: true,
         });
         const arr = Array.isArray(res.data) ? res.data : [];
-        const mapped =
-          mode === "dept" ? mapDeptRanking(arr) : mapMbtiRanking(arr);
+        const mapped = mode === "dept" ? mapDeptRanking(arr) : mapMbtiRanking(arr);
         setItems(mapped);
       } catch (e) {
         if (!controller.signal.aborted) {
@@ -90,17 +89,13 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
   }, [items]);
 
   const fade = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { duration: 0.35 } },
+    initial: { opacity: 0, y: 10 }, // 아래에서 올라옴
+    animate: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+    exit: { opacity: 0, y: -10, transition: { duration: 0.25 } }, // 위로 사라짐
   };
 
   return (
-    <motion.div
-      key={`${mode}-${activeTab}`} // ✅ 모드/탭 바뀔 때마다 새로 페이드인
-      className="rank-root"
-      role="main"
-      {...fade}
-    >
+    <div className="rank-root" role="main">
       {/* ===== 상단: 히어로 & 시상대 ===== */}
       <section className="rank-hero">
         <div className="ellipse-small" aria-hidden="true"></div>
@@ -145,77 +140,84 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
       </section>
 
       {/* ===== 하단: 탭 + 랭킹 리스트 ===== */}
-      <section className="rank-list-wrap">
-        <div
-          className={`rank-tabs tabs-underline ${
-            activeTab === "match" ? "is-match" : "is-flirt"
-          }`}
-          role="tablist"
-          aria-label="랭킹 기준"
+      <AnimatePresence mode="wait">
+        <motion.section
+          key={`${mode}-${activeTab}`} // ✅ 모드/탭 전환 시 전환 애니메이션
+          className="rank-list-wrap"
+          {...fade}
         >
-          <button
-            className={`tab ${activeTab === "flirt" ? "is-active" : ""}`}
-            onClick={() => setActiveTab("flirt")}
-            role="tab"
-            aria-selected={activeTab === "flirt"}
+          {/* 언더라인 탭 */}
+          <div
+            className={`rank-tabs tabs-underline ${
+              activeTab === "match" ? "is-match" : "is-flirt"
+            }`}
+            role="tablist"
+            aria-label="랭킹 기준"
           >
-            받은 플러팅
-          </button>
-          <button
-            className={`tab ${activeTab === "match" ? "is-active" : ""}`}
-            onClick={() => setActiveTab("match")}
-            role="tab"
-            aria-selected={activeTab === "match"}
-          >
-            성사된 매칭
-          </button>
-          <span className="tab-ink" aria-hidden="true" />
-        </div>
+            <button
+              className={`tab ${activeTab === "flirt" ? "is-active" : ""}`}
+              onClick={() => setActiveTab("flirt")}
+              role="tab"
+              aria-selected={activeTab === "flirt"}
+            >
+              받은 플러팅
+            </button>
+            <button
+              className={`tab ${activeTab === "match" ? "is-active" : ""}`}
+              onClick={() => setActiveTab("match")}
+              role="tab"
+              aria-selected={activeTab === "match"}
+            >
+              성사된 매칭
+            </button>
+            <span className="tab-ink" aria-hidden="true" />
+          </div>
 
-        {/* 로딩 / 에러 / 빈 상태 */}
-        {loading && (
-          <ol className="rank-list" aria-live="polite" aria-busy="true">
-            {Array.from({ length: 7 }).map((_, i) => (
-              <li key={i} className="rank-row" style={{ opacity: 0.6 }}>
-                <div className="rr-left">
-                  <span className="rr-rank">-</span>
-                  <div className="rr-thumb" />
-                  <div className="rr-info">
-                    <div className="rr-dept">로딩 중...</div>
-                    <div className="rr-meta">잠시만 기다려주세요</div>
+          {/* 로딩 / 에러 / 빈 상태 */}
+          {loading && (
+            <ol className="rank-list" aria-live="polite" aria-busy="true">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <li key={i} className="rank-row" style={{ opacity: 0.6 }}>
+                  <div className="rr-left">
+                    <span className="rr-rank">-</span>
+                    <div className="rr-thumb" />
+                    <div className="rr-info">
+                      <div className="rr-dept">로딩 중...</div>
+                      <div className="rr-meta">잠시만 기다려주세요</div>
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))}
-          </ol>
-        )}
+                </li>
+              ))}
+            </ol>
+          )}
 
-        {!loading && errMsg && (
-          <div role="alert" style={{ textAlign: "center", padding: "12px 0" }}>
-            {errMsg}
-          </div>
-        )}
+          {!loading && errMsg && (
+            <div role="alert" style={{ textAlign: "center", padding: "12px 0" }}>
+              {errMsg}
+            </div>
+          )}
 
-        {!loading && !errMsg && items.length === 0 && (
-          <div style={{ textAlign: "center", padding: "12px 0" }}>
-            데이터가 없습니다.
-          </div>
-        )}
+          {!loading && !errMsg && items.length === 0 && (
+            <div style={{ textAlign: "center", padding: "12px 0" }}>
+              데이터가 없습니다.
+            </div>
+          )}
 
-        {!loading && !errMsg && items.length > 0 && (
-          <ol className="rank-list" start={4} aria-label="4위부터 10위">
-            {tail.map((item, idx) => (
-              <RankRow
-                key={item.id}
-                rank={idx + 4}
-                item={item}
-                metricLabel={activeTab === "flirt" ? "플러팅" : "매칭"}
-              />
-            ))}
-          </ol>
-        )}
-      </section>
-    </motion.div>
+          {!loading && !errMsg && items.length > 0 && (
+            <ol className="rank-list" start={4} aria-label="4위부터 10위">
+              {tail.map((item, idx) => (
+                <RankRow
+                  key={item.id}
+                  rank={idx + 4}
+                  item={item}
+                  metricLabel={activeTab === "flirt" ? "플러팅" : "매칭"}
+                />
+              ))}
+            </ol>
+          )}
+        </motion.section>
+      </AnimatePresence>
+    </div>
   );
 }
 
