@@ -227,8 +227,8 @@ export default function Matching() {
     }
     openConfirm({
       title: "매칭 확인",
-      message: `매칭 기회 1회를 사용하여 후보를 받아옵니다.\n현재 보유: ${credits}회\n진행하시겠습니까?`,
-      acceptText: "진행",
+      message: `매칭 기회 1회를 사용하여 상대를 찾습니다.\n현재 보유: ${credits}회\n매칭하시겠습니까?`,
+      acceptText: "매칭하기",
       rejectText: "취소",
       onAccept: async () => {
         setConfirm(null);
