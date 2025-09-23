@@ -139,7 +139,7 @@
 
 .question {
   margin-top: 1.2rem;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   line-height: 1.5;
 }
 
@@ -159,7 +159,7 @@
   border-radius: 1.2rem;
   padding: 1.2rem 1.6rem;
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   cursor: pointer;
   transition: transform 80ms ease, filter 120ms ease, background 120ms ease;
 }
