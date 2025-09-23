@@ -139,7 +139,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  padding: 0 2rem 2rem;
+  padding: 0 1rem 1rem;
 }
 
 .reject-btn,
