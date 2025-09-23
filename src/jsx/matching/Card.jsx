@@ -195,8 +195,8 @@ export default function Card({ initialCandidates = [] }) {
     }
     openConfirm({
       title: "다시 매칭하기",
-      message: `매칭 기회 1회를 사용하여 새로운 후보를 받습니다.\n현재 보유: ${credits}회\n진행하시겠습니까?`,
-      acceptText: "진행",
+      message: `매칭 기회를 사용하여 새로운 상대를 찾습니다.\n현재 보유: ${credits}회\n매칭하시겠습니까?`,
+      acceptText: "매칭하기",
       rejectText: "취소",
       onAccept: async () => {
         setConfirm(null);
