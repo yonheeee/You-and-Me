@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
-import { motion, AnimatePresence } from "framer-motion";
+
 import "../../css/ranking/Ranking.css";
 import King from "../../image/ranking/king.svg";
+import { AnimatePresence, motion } from "framer-motion";
 
 /** 공통 매핑: 학과 */
 function mapDeptRanking(apiItems = []) {
@@ -16,7 +17,7 @@ function mapDeptRanking(apiItems = []) {
   }));
 }
 
-/** 공통 매핑: MBTI */
+/** 공통 매핑: MBTI (imageUrl 지원) */
 function mapMbtiRanking(apiItems = []) {
   return apiItems.slice(0, 10).map((it) => ({
     id: it.rank ?? it.mbti ?? Math.random(),
@@ -28,6 +29,11 @@ function mapMbtiRanking(apiItems = []) {
   }));
 }
 
+/**
+ * props
+ * - mode: 'dept' | 'mbti'  (기본: 'dept')
+ * - onClickTopRight: 버튼 클릭시 라우팅 처리 (부모에서 navigate)
+ */
 export default function Ranking({ mode = "dept", onClickTopRight }) {
   const [activeTab, setActiveTab] = useState("flirt"); // 'flirt' | 'match'
   const [items, setItems] = useState([]);
@@ -88,12 +94,6 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
     return { top3: sorted.slice(0, 3), tail: sorted.slice(3, 10) };
   }, [items]);
 
-  const fade = {
-    initial: { opacity: 0, y: 10 }, // 아래에서 올라옴
-    animate: { opacity: 1, y: 0, transition: { duration: 0.35 } },
-    exit: { opacity: 0, y: -10, transition: { duration: 0.25 } }, // 위로 사라짐
-  };
-
   return (
     <div className="rank-root" role="main">
       {/* ===== 상단: 히어로 & 시상대 ===== */}
@@ -109,14 +109,24 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
           </button>
         </div>
 
-        {/* 1,2,3등 프로필 */}
+        {/* ✅ PodiumHead crossfade */}
         <div className="podium-heads" aria-label="상위 3위">
-          {top3[1] && <PodiumHead rank={2} item={top3[1]} />}
-          {top3[0] && <PodiumHead rank={1} item={top3[0]} highlight />}
-          {top3[2] && <PodiumHead rank={3} item={top3[2]} />}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab + mode} // 탭/모드 바뀔 때 새로 렌더
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.35 } }}
+              exit={{ opacity: 0, transition: { duration: 0.25 } }}
+              style={{ display: "flex", gap: "1rem" }}
+            >
+              {top3[1] && <PodiumHead rank={2} item={top3[1]} />}
+              {top3[0] && <PodiumHead rank={1} item={top3[0]} highlight />}
+              {top3[2] && <PodiumHead rank={3} item={top3[2]} />}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        {/* 시상대 */}
+        {/* 시상대(2,1,3) */}
         <div className="podium">
           <div className="podium-col second" aria-hidden="true">
             <div className="podium-top top-second"></div>
@@ -139,102 +149,102 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
         </div>
       </section>
 
-      {/* ===== 하단: 탭 + 랭킹 리스트 ===== */}
-      <AnimatePresence mode="wait">
-        <motion.section
-          key={`${mode}-${activeTab}`} // ✅ 모드/탭 전환 시 애니메이션
-          className="rank-list-wrap"
-          {...fade}
+      {/* ===== 하단: 탭 + 랭킹 리스트(4~10위) ===== */}
+      <section className="rank-list-wrap">
+        {/* 언더라인 탭 */}
+        <div
+          className={`rank-tabs tabs-underline ${
+            activeTab === "match" ? "is-match" : "is-flirt"
+          }`}
+          role="tablist"
+          aria-label="랭킹 기준"
         >
-          {/* 언더라인 탭 */}
-          <div className="rank-tabs tabs-underline" role="tablist" aria-label="랭킹 기준">
-            <button
-              className={`tab ${activeTab === "flirt" ? "is-active" : ""}`}
-              onClick={() => setActiveTab("flirt")}
-              role="tab"
-              aria-selected={activeTab === "flirt"}
-            >
-              받은 플러팅
-              {activeTab === "flirt" && (
-                <motion.span
-                  className="tab-ink"
-                  layoutId="tabInk" // ✅ 같은 layoutId 공유
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                />
-              )}
-            </button>
-            <button
-              className={`tab ${activeTab === "match" ? "is-active" : ""}`}
-              onClick={() => setActiveTab("match")}
-              role="tab"
-              aria-selected={activeTab === "match"}
-            >
-              성사된 매칭
-              {activeTab === "match" && (
-                <motion.span
-                  className="tab-ink"
-                  layoutId="tabInk"
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                />
-              )}
-            </button>
-          </div>
+          <button
+            className={`tab ${activeTab === "flirt" ? "is-active" : ""}`}
+            onClick={() => setActiveTab("flirt")}
+            role="tab"
+            aria-selected={activeTab === "flirt"}
+          >
+            받은 플러팅
+          </button>
+          <button
+            className={`tab ${activeTab === "match" ? "is-active" : ""}`}
+            onClick={() => setActiveTab("match")}
+            role="tab"
+            aria-selected={activeTab === "match"}
+          >
+            성사된 매칭
+          </button>
+          <span className="tab-ink" aria-hidden="true" />
+        </div>
 
-          {/* 로딩 / 에러 / 빈 상태 */}
-          {loading && (
-            <ol className="rank-list" aria-live="polite" aria-busy="true">
-              {Array.from({ length: 7 }).map((_, i) => (
-                <li key={i} className="rank-row" style={{ opacity: 0.6 }}>
-                  <div className="rr-left">
-                    <span className="rr-rank">-</span>
-                    <div className="rr-thumb" />
-                    <div className="rr-info">
-                      <div className="rr-dept">로딩 중...</div>
-                      <div className="rr-meta">잠시만 기다려주세요</div>
+        {/* 리스트 영역 crossfade */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab + mode + "-list"}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.35 } }}
+            exit={{ opacity: 0, transition: { duration: 0.25 } }}
+          >
+            {loading && (
+              <ol className="rank-list" aria-live="polite" aria-busy="true">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <li key={i} className="rank-row" style={{ opacity: 0.6 }}>
+                    <div className="rr-left">
+                      <span className="rr-rank">-</span>
+                      <div className="rr-thumb" />
+                      <div className="rr-info">
+                        <div className="rr-dept">로딩 중...</div>
+                        <div className="rr-meta">잠시만 기다려주세요</div>
+                      </div>
                     </div>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          )}
+                  </li>
+                ))}
+              </ol>
+            )}
 
-          {!loading && errMsg && (
-            <div role="alert" style={{ textAlign: "center", padding: "12px 0" }}>
-              {errMsg}
-            </div>
-          )}
+            {!loading && errMsg && (
+              <div
+                role="alert"
+                style={{ textAlign: "center", padding: "12px 0" }}
+              >
+                {errMsg}
+              </div>
+            )}
 
-          {!loading && !errMsg && items.length === 0 && (
-            <div style={{ textAlign: "center", padding: "12px 0" }}>
-              데이터가 없습니다.
-            </div>
-          )}
+            {!loading && !errMsg && items.length === 0 && (
+              <div style={{ textAlign: "center", padding: "12px 0" }}>
+                데이터가 없습니다.
+              </div>
+            )}
 
-          {!loading && !errMsg && items.length > 0 && (
-            <ol className="rank-list" start={4} aria-label="4위부터 10위">
-              {tail.map((item, idx) => (
-                <RankRow
-                  key={item.id}
-                  rank={idx + 4}
-                  item={item}
-                  metricLabel={activeTab === "flirt" ? "플러팅" : "매칭"}
-                />
-              ))}
-            </ol>
-          )}
-        </motion.section>
-      </AnimatePresence>
+            {!loading && !errMsg && items.length > 0 && (
+              <ol className="rank-list" start={4} aria-label="4위부터 10위">
+                {tail.map((item, idx) => (
+                  <RankRow
+                    key={item.id}
+                    rank={idx + 4}
+                    item={item}
+                    metricLabel={activeTab === "flirt" ? "플러팅" : "매칭"}
+                  />
+                ))}
+              </ol>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </section>
     </div>
   );
 }
 
-/* ===== 상단 프로필 ===== */
+/* ===== 상단 프로필(1/2/3위) ===== */
 function PodiumHead({ rank, item, highlight = false }) {
   const hasImg = !!item.imageUrl;
   return (
     <div className={`podium-head rank-${rank} ${highlight ? "highlight" : ""}`}>
       <div className="ph-img-wrap">
         {rank === 1 && <img src={King} alt="왕관" className="ph-king" />}
+
         <div className="ph-img" aria-hidden={!hasImg}>
           {hasImg ? (
             <img src={item.imageUrl} alt={`${rank}위 ${item.deptName}`} />
@@ -279,6 +289,7 @@ function RankRow({ rank, item, metricLabel }) {
     <li className="rank-row">
       <div className="rr-left">
         <span className="rr-rank">{rank}</span>
+
         <div className="rr-thumb">
           {hasImg ? (
             <img src={item.imageUrl} alt={`${item.deptName} 로고`} />
@@ -295,13 +306,14 @@ function RankRow({ rank, item, metricLabel }) {
                 color: "#7a1b60",
                 background: "#fff",
               }}
-              aria-label={item.deptName}
+              aria-label={`${item.deptName}`}
               title={item.deptName}
             >
               {item.deptName}
             </div>
           )}
         </div>
+
         <div className="rr-info">
           <div className="rr-dept" title={item.deptName}>
             {item.deptName}
