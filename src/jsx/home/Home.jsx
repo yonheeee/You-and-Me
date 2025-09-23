@@ -98,18 +98,23 @@ function Home() {
                 <dl className="credits-list">
                   <div className="credits-item">
                     <dt className="credits-label">디자인</dt>
-                    <dd className="credits-value">시각디자인학과 23 문지원</dd>
+                    <dd className="credits-value">
+                      시각디자인학과
+                      <br /> 23 문지원
+                    </dd>
                   </div>
                   <div className="credits-item">
                     <dt className="credits-label">프론트엔드</dt>
                     <dd className="credits-value">
-                      항공소프트웨어공학과 22 김형석
+                      항공소프트웨어공학과
+                      <br /> 22 김형석
                     </dd>
                   </div>
                   <div className="credits-item">
                     <dt className="credits-label">백엔드</dt>
                     <dd className="credits-value">
-                      항공소프트웨어공학과 22 박찬우
+                      항공소프트웨어공학과
+                      <br /> 22 박찬우
                     </dd>
                   </div>
                 </dl>
