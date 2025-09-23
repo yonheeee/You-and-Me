@@ -142,18 +142,12 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
       {/* ===== 하단: 탭 + 랭킹 리스트 ===== */}
       <AnimatePresence mode="wait">
         <motion.section
-          key={`${mode}-${activeTab}`} // ✅ 모드/탭 전환 시 전환 애니메이션
+          key={`${mode}-${activeTab}`} // ✅ 모드/탭 전환 시 애니메이션
           className="rank-list-wrap"
           {...fade}
         >
           {/* 언더라인 탭 */}
-          <div
-            className={`rank-tabs tabs-underline ${
-              activeTab === "match" ? "is-match" : "is-flirt"
-            }`}
-            role="tablist"
-            aria-label="랭킹 기준"
-          >
+          <div className="rank-tabs tabs-underline" role="tablist" aria-label="랭킹 기준">
             <button
               className={`tab ${activeTab === "flirt" ? "is-active" : ""}`}
               onClick={() => setActiveTab("flirt")}
@@ -161,6 +155,13 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
               aria-selected={activeTab === "flirt"}
             >
               받은 플러팅
+              {activeTab === "flirt" && (
+                <motion.span
+                  className="tab-ink"
+                  layoutId="tabInk" // ✅ 같은 layoutId 공유
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                />
+              )}
             </button>
             <button
               className={`tab ${activeTab === "match" ? "is-active" : ""}`}
@@ -169,8 +170,14 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
               aria-selected={activeTab === "match"}
             >
               성사된 매칭
+              {activeTab === "match" && (
+                <motion.span
+                  className="tab-ink"
+                  layoutId="tabInk"
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                />
+              )}
             </button>
-            <span className="tab-ink" aria-hidden="true" />
           </div>
 
           {/* 로딩 / 에러 / 빈 상태 */}
