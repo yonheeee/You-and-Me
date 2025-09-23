@@ -209,3 +209,74 @@
     max-height: 64px;
   }
 }
+
+/* ===== Credits (FAQ 톤 박스) ===== */
+.credits-section {
+  padding: 2rem 1.6rem;
+}
+
+.credits-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fff6fb 100%);
+  border: 0.1rem solid #ffd7e7;
+  border-radius: 2rem;
+  padding: 1.8rem;
+  box-shadow: 0 0.8rem 2.4rem rgba(0, 0, 0, 0.06);
+}
+
+.credits-title {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0 0 1.2rem 0;
+}
+
+.credits-badge {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: #ff5a91;          /* 앱 포인트 컬러 */
+  padding: 0.4rem 0.8rem;
+  border-radius: 1.2rem;
+  letter-spacing: 0.02em;
+}
+
+.credits-list {
+  display: grid;
+  row-gap: 0.8rem;
+}
+
+.credits-item {
+  display: flex;
+  align-items: baseline;
+  gap: 1.2rem;
+  padding: 1rem 1.2rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 90, 145, 0.05);
+}
+
+.credits-label {
+  flex: 0 0 7.2rem;              /* 라벨 고정폭 */
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #ff5a91;
+}
+
+.credits-value {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #374151;
+}
+
+/* 로고 아이콘 */
+.credits-logo {
+  width: 2.4rem;        /* 24px */
+  height: 2.4rem;
+  object-fit: contain;
+  border-radius: 0.6rem;
+  background: #ffffff;  /* 투명 PNG 대비 */
+  padding: 0.3rem;
+  box-shadow: 0 0.2rem 0.6rem rgba(0,0,0,0.08);
+}
+

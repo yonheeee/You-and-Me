@@ -11,7 +11,7 @@ import PopUp from "./PopUp";
 import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion"; // ✅ 추가
-import Loader from "../common/Loader";                   // ✅ 추가
+import Loader from "../common/Loader"; // ✅ 추가
 
 function Home() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -38,12 +38,16 @@ function Home() {
               <div className="hero-bg"></div>
               <div className="hero-content">
                 <p className="hero-subtitle">
-                  평범한 축제가 <span className="highlight">특별</span>해지는 순간!{" "}
-                  <br />
-                  당신의 옆자리를 채울 <span className="highlight">한 사람</span>을
-                  찾아보세요.
+                  평범한 축제가 <span className="highlight">특별</span>해지는
+                  순간! <br />
+                  당신의 옆자리를 채울{" "}
+                  <span className="highlight">한 사람</span>을 찾아보세요.
                 </p>
-                <img src={Logo} alt="너랑 나랑 로고" className="hero-logo-img" />
+                <img
+                  src={Logo}
+                  alt="너랑 나랑 로고"
+                  className="hero-logo-img"
+                />
               </div>
             </section>
 
@@ -86,13 +90,51 @@ function Home() {
                 type="button"
               >
                 <div className="QandA-text">
-                  <div className="Q-title" style={{ fontSize: "20px", fontWeight: "bold" }}>FAQ</div>
+                  <div
+                    className="Q-title"
+                    style={{ fontSize: "20px", fontWeight: "bold" }}
+                  >
+                    FAQ
+                  </div>
                   <div className="Q-subtitle" style={{ fontSize: "14px" }}>
                     자주 묻는 질문 및 개인정보 처리방침
                   </div>
                 </div>
                 <img src={QandA} alt="큐엔에이 이미지" />
               </button>
+            </section>
+            {/* 팀 크레딧 박스 */}
+            <section className="credits-section">
+              <div className="credits-card">
+                <h3 className="credits-title">
+                  <img
+                    src={`${process.env.PUBLIC_URL}/멋사로고.png`} // 또는 src="/멋사로고.png"
+                    alt="멋사 로고"
+                    className="credits-logo"
+                  />
+                  멋쟁이사자처럼
+                  <span className="credits-badge">TEAM</span>
+                </h3>
+
+                <dl className="credits-list">
+                  <div className="credits-item">
+                    <dt className="credits-label">디자인</dt>
+                    <dd className="credits-value">시각디자인학과 23 문지원</dd>
+                  </div>
+                  <div className="credits-item">
+                    <dt className="credits-label">프론트엔드</dt>
+                    <dd className="credits-value">
+                      항공소프트웨어공학과 22 김형석
+                    </dd>
+                  </div>
+                  <div className="credits-item">
+                    <dt className="credits-label">백엔드</dt>
+                    <dd className="credits-value">
+                      항공소프트웨어공학과 22 박찬우
+                    </dd>
+                  </div>
+                </dl>
+              </div>
             </section>
 
             {/* 팝업 */}
