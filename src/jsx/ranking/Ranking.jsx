@@ -20,7 +20,7 @@ function mapDeptRanking(apiItems = []) {
 function mapMbtiRanking(apiItems = []) {
   return apiItems.slice(0, 10).map((it) => ({
     id: it.rank ?? it.mbti ?? Math.random(),
-    deptName: it.mbti ?? "-", // UI 공통 필드 사용
+    deptName: it.mbti ?? "-",
     count: it.count ?? 0,
     imageUrl: it.imageUrl ?? "",
     rank: it.rank ?? null,
@@ -60,7 +60,8 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
           noAuth: true,
         });
         const arr = Array.isArray(res.data) ? res.data : [];
-        const mapped = mode === "dept" ? mapDeptRanking(arr) : mapMbtiRanking(arr);
+        const mapped =
+          mode === "dept" ? mapDeptRanking(arr) : mapMbtiRanking(arr);
         setItems(mapped);
       } catch (e) {
         if (!controller.signal.aborted) {
@@ -109,11 +110,21 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
           </button>
         </div>
 
-        {/* 1,2,3등 프로필 */}
+        {/* ✅ 1,2,3등 프로필 (crossfade 애니메이션) */}
         <div className="podium-heads" aria-label="상위 3위">
-          {top3[1] && <PodiumHead rank={2} item={top3[1]} />}
-          {top3[0] && <PodiumHead rank={1} item={top3[0]} highlight />}
-          {top3[2] && <PodiumHead rank={3} item={top3[2]} />}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`${mode}-${activeTab}-top3`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.35 } }}
+              exit={{ opacity: 0, transition: { duration: 0.25 } }}
+              style={{ display: "flex" }}
+            >
+              {top3[1] && <PodiumHead rank={2} item={top3[1]} />}
+              {top3[0] && <PodiumHead rank={1} item={top3[0]} highlight />}
+              {top3[2] && <PodiumHead rank={3} item={top3[2]} />}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* 시상대 */}
