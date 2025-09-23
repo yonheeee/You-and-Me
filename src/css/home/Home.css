@@ -260,6 +260,7 @@
   font-size: 0.8rem;
   font-weight: 800;
   color: #ff5a91;
+  white-space: nowrap;
 }
 
 /* dd 묶음 (세로로) */
