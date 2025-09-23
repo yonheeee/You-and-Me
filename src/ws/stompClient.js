@@ -1,97 +1,163 @@
 // src/ws/stompClient.js
 import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 import { WS_URL, SUBS } from "./wsConfig";
-// WS_URL = "https://api.likelionhsu.co.kr/api/ws"
 
+/** ===== 전역 상태 ===== */
 let client = null;
+let connecting = false;
+let retryTimer = null;
+let retryCount = 0;
+let lastArgs = null; // { token, handlers }
 
-// 👉 SockJS 대신 순수 WS 사용: wss://.../api/ws/websocket?token=...
-function makeBrokerURL(token) {
-  // SockJS endpoint의 native ws 엔드포인트는 보통 .../websocket 로 열립니다.
-  const base = WS_URL.replace(/^http(s?):\/\//, "wss://"); // https -> wss
-  const wsEntry = base.endsWith("/websocket") ? base : `${base}/websocket`;
-  const q = `token=${encodeURIComponent(token)}`;
-  return `${wsEntry}?${q}`;
+/** ===== 옵션(상황에 맞게) ===== */
+const USE_PLAIN_WS = true;          // true: native ws, false: SockJS
+const APPEND_TOKEN_IN_URL = true;   // 서버가 handshake에서 token을 읽는다면 true 유지
+const MAX_BACKOFF_MS = 30000;       // 재시도 상한
+
+/** ===== 유틸 ===== */
+const isDev = process.env.NODE_ENV === "development";
+const debugFn = isDev ? (m) => console.log("[STOMP]", m) : () => {};
+const jitter = (ms) => ms + Math.floor(Math.random() * 500);
+const backoff = () => Math.min(MAX_BACKOFF_MS, 2000 * 2 ** retryCount);
+
+function makePlainWsURL(baseUrl, token) {
+  // https://.../api/ws -> wss://.../api/ws/websocket[?token=...]
+  let url = baseUrl.replace(/^http:/, "ws:").replace(/^https:/, "wss:");
+  if (!url.endsWith("/websocket")) url = `${url}/websocket`;
+  if (APPEND_TOKEN_IN_URL) {
+    const join = url.includes("?") ? "&" : "?";
+    url = `${url}${join}token=${encodeURIComponent(token)}`;
+  }
+  return url;
 }
 
-export function connect(token, handlers = {}) {
-  console.log("[WS] connect(plain-ws) token:", !!token, "WS_URL:", WS_URL);
+function scheduleReconnect() {
+  if (!lastArgs) return;
+  const wait = jitter(backoff());
+  clearTimeout(retryTimer);
+  retryTimer = setTimeout(() => {
+    retryCount++;
+    connect(lastArgs.token, lastArgs.handlers);
+  }, wait);
+  if (isDev) console.log(`[WS] 재시도 예약: ${wait}ms (retry=${retryCount})`);
+}
 
+/** ===== 외부 API ===== */
+export function connect(token, handlers = {}) {
+  lastArgs = { token, handlers };
+
+  if (!token) {
+    console.warn("[WS] token 없음 → 연결 시도 안 함");
+    return;
+  }
+  if (connecting) {
+    if (isDev) console.log("[WS] 이미 연결 시도중…");
+    return;
+  }
+
+  // 기존 연결 정리
+  clearTimeout(retryTimer);
   if (client) {
     try { client.deactivate(); } catch {}
     client = null;
   }
 
-  client = new Client({
-    // ✅ 순수 WebSocket 사용
-    brokerURL: makeBrokerURL(token),
-    // SockJS가 아니므로 webSocketFactory는 사용 안 함
+  connecting = true;
+  retryTimer = null;
+
+  const cfg = {
+    // 자동 재시도는 우리가 제어한다
+    reconnectDelay: 0,
+    heartbeatIncoming: 10000,
+    heartbeatOutgoing: 10000,
+    debug: debugFn,
+
+    // 서버가 어떤 헤더를 보든 대응(Authorization/jwt/x-auth-token)
     connectHeaders: {
-      // 혹시 서버가 CONNECT 헤더도 참고한다면 같이 넘겨둠
       Authorization: `Bearer ${token}`,
       jwt: token,
       "x-auth-token": token,
     },
-    debug: (m) => console.log("[STOMP debug]", m),
-
-    // 디버깅 중 무한루프 방지
-    reconnectDelay: 0,
-    heartbeatIncoming: 10000,
-    heartbeatOutgoing: 10000,
 
     onConnect: () => {
-      console.log("[STOMP] connected (plain-ws) ✅");
+      console.log("[STOMP] connected ✅");
+      connecting = false;
+      retryCount = 0;
 
-      // 구독 (필요 시 살짝 지연)
-      setTimeout(() => {
-        try {
-          client.subscribe(SUBS.signals, (msg) => {
-            try {
-              const payload = JSON.parse(msg.body);
-              console.log("[STOMP] signals:", payload);
-              handlers.onSignal?.(payload);
-            } catch (e) {
-              console.warn("[STOMP] signals parse error:", e);
-            }
-          }, { receipt: "sub-signals" });
+      try {
+        client.subscribe(SUBS.signals, (msg) => {
+          try {
+            handlers.onSignal?.(JSON.parse(msg.body));
+          } catch (e) {
+            console.warn("[STOMP] signals parse error:", e);
+          }
+        });
 
-          client.subscribe(SUBS.matches, (msg) => {
-            try {
-              const payload = JSON.parse(msg.body);
-              console.log("[STOMP] matches:", payload);
-              handlers.onMatch?.(payload);
-            } catch (e) {
-              console.warn("[STOMP] matches parse error:", e);
-            }
-          }, { receipt: "sub-matches" });
+        client.subscribe(SUBS.matches, (msg) => {
+          try {
+            handlers.onMatch?.(JSON.parse(msg.body));
+          } catch (e) {
+            console.warn("[STOMP] matches parse error:", e);
+          }
+        });
 
-          console.log("[STOMP] 구독 전송:", SUBS);
-        } catch (e) {
-          console.error("[STOMP] subscribe 예외:", e);
-        }
-      }, 150);
+        if (isDev) console.log("[STOMP] subscribed:", SUBS);
+      } catch (e) {
+        console.error("[STOMP] subscribe error:", e);
+      }
     },
 
     onStompError: (frame) => {
-      console.error("[STOMP] broker error:", frame?.headers?.message, "\nbody:", frame?.body);
-      try { client.deactivate(); } catch {}
+      connecting = false;
+      console.error(
+        "[STOMP] broker error:",
+        frame?.headers?.message,
+        "\nbody:",
+        frame?.body
+      );
+      scheduleReconnect();
     },
-    onWebSocketError: (e) => {
-      console.error("[STOMP] websocket error:", e);
-    },
-    onWebSocketClose: () => {
-      console.warn("[STOMP] websocket closed");
-    },
-  });
 
-  console.log("[WS] client.activate()");
+    onWebSocketError: (e) => {
+      connecting = false;
+      console.error("[STOMP] websocket error:", e?.message || e);
+      scheduleReconnect();
+    },
+
+    onWebSocketClose: () => {
+      connecting = false;
+      console.warn("[STOMP] websocket closed");
+      scheduleReconnect();
+    },
+  };
+
+  // 전송 방식 선택
+  if (USE_PLAIN_WS) {
+    cfg.brokerURL = makePlainWsURL(WS_URL, token);
+    if (isDev) console.log("[WS] connect(plain-ws) →", cfg.brokerURL);
+  } else {
+    cfg.webSocketFactory = () =>
+      new SockJS(WS_URL, null, {
+        transports: ["websocket", "xhr-streaming", "xhr-polling"],
+      });
+    if (isDev) console.log("[WS] connect(sockjs) →", WS_URL);
+  }
+
+  client = new Client(cfg);
   client.activate();
 }
 
 export function disconnect() {
+  clearTimeout(retryTimer);
+  retryTimer = null;
+  connecting = false;
   if (client) {
-    console.log("[WS] disconnect()");
     try { client.deactivate(); } catch {}
     client = null;
   }
+}
+
+export function isConnected() {
+  return !!client && client.connected === true;
 }
