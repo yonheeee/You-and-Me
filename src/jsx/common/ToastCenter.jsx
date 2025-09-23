@@ -23,7 +23,7 @@ export default function ToastCenter() {
     // 3초 뒤 자동 제거
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3000);
+    }, 10000);
   };
 
   // ✅ signal 수신 시 토스트
