@@ -2,8 +2,8 @@ import "../../css/home/Home.css";
 import FlirtingTabs from "./FlirtingTabs";
 import Logo from "../../image/loginPage/logo2.png";
 import MatchingBanner from "../../image/home/match.svg";
-import Map from "../../image/home/map.png";
-import MapInfo from "../../image/home/mapinfo.png";
+import MapInfo from "../../image/home/map.png";
+import Map from "../../image/home/mapinfo.png";
 import QandA from "../../image/home/q&a.svg";
 
 import { ReactComponent as InstaIcon } from "../../image/home/instagram.svg";
