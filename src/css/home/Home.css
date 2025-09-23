@@ -254,22 +254,20 @@
   background: rgba(255, 90, 145, 0.05);
 }
 
-/* 라벨 줄바꿈 방지 */
+/* 라벨 */
 .credits-label {
-  flex: 0 0 auto;           /* 고정폭 대신 글자 크기에 맞춤 */
-  white-space: nowrap;      /* ✅ 줄바꿈 방지 */
+  flex: 0 0 3.2rem; /* 라벨 고정폭 */
   font-size: 0.8rem;
   font-weight: 800;
   color: #ff5a91;
 }
 
-/* info 묶음은 가로로 늘어나되 최대한 줄바꿈 안 되게 */
+/* dd 묶음 (세로로) */
 .credits-info {
   display: flex;
-  flex-direction: column;
+  flex-direction: column;  /* ✅ 세로 쌓기 */
   gap: 0.3rem;
-  flex: 1;
-  min-width: 0;             /* ✅ ellipsis 동작을 위한 필수 조건 */
+  flex: 1;                 /* 남은 공간 차지 */
 }
 
 .credit-value {
@@ -282,14 +280,6 @@
   font-size: 0.85rem;
   font-weight: 500;
   color: #374151;
-}
-
-/* 값(major, person) 줄바꿈 최소화 */
-.credit-value,
-.credits-value {
-  white-space: nowrap;      /* ✅ 줄바꿈 방지 */
-  overflow: hidden;         /* 길 경우 잘라내기 */
-  text-overflow: ellipsis;  /* … 으로 표시 */
 }
 
 /* 로고 아이콘 */
