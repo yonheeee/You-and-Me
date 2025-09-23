@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
-
+import { motion } from "framer-motion"; // ✅ fade-in용
 import "../../css/ranking/Ranking.css";
 import King from "../../image/ranking/king.svg";
 
@@ -16,7 +16,7 @@ function mapDeptRanking(apiItems = []) {
   }));
 }
 
-/** 공통 매핑: MBTI (imageUrl 지원) */
+/** 공통 매핑: MBTI */
 function mapMbtiRanking(apiItems = []) {
   return apiItems.slice(0, 10).map((it) => ({
     id: it.rank ?? it.mbti ?? Math.random(),
@@ -28,11 +28,6 @@ function mapMbtiRanking(apiItems = []) {
   }));
 }
 
-/**
- * props
- * - mode: 'dept' | 'mbti'  (기본: 'dept')
- * - onClickTopRight: 버튼 클릭시 라우팅 처리 (부모에서 navigate)
- */
 export default function Ranking({ mode = "dept", onClickTopRight }) {
   const [activeTab, setActiveTab] = useState("flirt"); // 'flirt' | 'match'
   const [items, setItems] = useState([]);
@@ -65,7 +60,8 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
           noAuth: true,
         });
         const arr = Array.isArray(res.data) ? res.data : [];
-        const mapped = mode === "dept" ? mapDeptRanking(arr) : mapMbtiRanking(arr);
+        const mapped =
+          mode === "dept" ? mapDeptRanking(arr) : mapMbtiRanking(arr);
         setItems(mapped);
       } catch (e) {
         if (!controller.signal.aborted) {
@@ -84,7 +80,7 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
     return () => controller.abort();
   }, [mode, activeTab, path]);
 
-  // 상단 1~3위, 하단 4~10위 (rank 우선, 없으면 count desc)
+  // 상단 1~3위, 하단 4~10위
   const { top3, tail } = useMemo(() => {
     const sorted = [...items].sort((a, b) => {
       if (a.rank != null && b.rank != null) return a.rank - b.rank;
@@ -93,8 +89,18 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
     return { top3: sorted.slice(0, 3), tail: sorted.slice(3, 10) };
   }, [items]);
 
+  const fade = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { duration: 0.35 } },
+  };
+
   return (
-    <div className="rank-root" role="main">
+    <motion.div
+      key={`${mode}-${activeTab}`} // ✅ 모드/탭 바뀔 때마다 새로 페이드인
+      className="rank-root"
+      role="main"
+      {...fade}
+    >
       {/* ===== 상단: 히어로 & 시상대 ===== */}
       <section className="rank-hero">
         <div className="ellipse-small" aria-hidden="true"></div>
@@ -115,7 +121,7 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
           {top3[2] && <PodiumHead rank={3} item={top3[2]} />}
         </div>
 
-        {/* 시상대(2,1,3) */}
+        {/* 시상대 */}
         <div className="podium">
           <div className="podium-col second" aria-hidden="true">
             <div className="podium-top top-second"></div>
@@ -138,9 +144,8 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
         </div>
       </section>
 
-      {/* ===== 하단: 탭 + 랭킹 리스트(4~10위) ===== */}
+      {/* ===== 하단: 탭 + 랭킹 리스트 ===== */}
       <section className="rank-list-wrap">
-        {/* 언더라인 탭 */}
         <div
           className={`rank-tabs tabs-underline ${
             activeTab === "match" ? "is-match" : "is-flirt"
@@ -210,18 +215,17 @@ export default function Ranking({ mode = "dept", onClickTopRight }) {
           </ol>
         )}
       </section>
-    </div>
+    </motion.div>
   );
 }
 
-/* ===== 상단 프로필(1/2/3위 얼굴+과명(or MBTI)+수치) ===== */
+/* ===== 상단 프로필 ===== */
 function PodiumHead({ rank, item, highlight = false }) {
   const hasImg = !!item.imageUrl;
   return (
     <div className={`podium-head rank-${rank} ${highlight ? "highlight" : ""}`}>
       <div className="ph-img-wrap">
         {rank === 1 && <img src={King} alt="왕관" className="ph-king" />}
-
         <div className="ph-img" aria-hidden={!hasImg}>
           {hasImg ? (
             <img src={item.imageUrl} alt={`${rank}위 ${item.deptName}`} />
@@ -259,14 +263,13 @@ function PodiumHead({ rank, item, highlight = false }) {
   );
 }
 
-/* ===== 하단 랭킹 행(4~10위) ===== */
+/* ===== 하단 랭킹 행 ===== */
 function RankRow({ rank, item, metricLabel }) {
   const hasImg = !!item.imageUrl;
   return (
     <li className="rank-row">
       <div className="rr-left">
         <span className="rr-rank">{rank}</span>
-
         <div className="rr-thumb">
           {hasImg ? (
             <img src={item.imageUrl} alt={`${item.deptName} 로고`} />
@@ -283,14 +286,13 @@ function RankRow({ rank, item, metricLabel }) {
                 color: "#7a1b60",
                 background: "#fff",
               }}
-              aria-label={`${item.deptName}`}
+              aria-label={item.deptName}
               title={item.deptName}
             >
               {item.deptName}
             </div>
           )}
         </div>
-
         <div className="rr-info">
           <div className="rr-dept" title={item.deptName}>
             {item.deptName}
