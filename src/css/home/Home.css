@@ -155,8 +155,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: -4rem;
-  margin-bottom: 5rem;
+  padding-top: -4rem;
+  padding-bottom: 5rem;
 }
 
 .QandA-btn {
@@ -171,7 +171,7 @@
   background: linear-gradient(to right, #FFEDF8 40%, #F6B7DD 100%);
   color: #575757;
   border-radius: 1.5rem;
-  padding: 1rem 1.25rem;     
+  padding: 0rem 1.25rem;     
   text-align: left;
   border: none;
   cursor: pointer;
