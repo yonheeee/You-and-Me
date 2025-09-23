@@ -32,7 +32,7 @@ export default function AppWsBridge() {
       console.log("[WS] AppWsBridge cleanup 실행 → disconnect 호출");
       disconnect();
     };
-  }, [user?.accessToken]);
+  }, [user?.accessToken, user]);
 
   return null; // UI 없음, 브릿지 역할만
 }

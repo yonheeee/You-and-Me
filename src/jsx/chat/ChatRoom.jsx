@@ -28,7 +28,7 @@ export default function ChatRoom() {
   const navigate = useNavigate();
   const { user } = useUserStore();
 
-  const { addDeletedRoom } = useChatStore(); // 삭제 방 id 기록
+  const { addDeletedRoom } = useChatStore();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -45,16 +45,19 @@ export default function ChatRoom() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const inputWrapperRef = useRef(null);
-  const composingRef = useRef(false); // 한글 IME 조합 상태
+  const composingRef = useRef(false);
 
-  // 포커스 보강: 전송 후/터치 후 안전 포커스
+  // ✅ 첫 로드 체크 ref
+  const firstLoadRef = useRef(true);
+
+  // 포커스 보강
   const refocusInput = useCallback(() => {
     setTimeout(() => {
       inputRef.current?.focus({ preventScroll: true });
     }, 0);
   }, []);
 
-  // iOS 포커스 보정: 입력 포커스 시 body unlock, 블러 시 재잠금
+  // iOS 스크롤 보정
   const unlockBodyScroll = useCallback(() => {
     document.body.style.overflow = "auto";
   }, []);
@@ -68,7 +71,7 @@ export default function ChatRoom() {
     return unsub;
   }, []);
 
-  // 기본적으로 body 스크롤 잠금 (채팅화면)
+  // 채팅화면 body 스크롤 잠금
   useEffect(() => {
     lockBodyScroll();
     return () => {
@@ -76,7 +79,7 @@ export default function ChatRoom() {
     };
   }, [lockBodyScroll]);
 
-  // 방 정보 불러오기
+  // 방 정보 로드
   useEffect(() => {
     if (!authReady || !roomId) return;
     const roomRef = doc(db, "chatRooms", roomId);
@@ -113,7 +116,7 @@ export default function ChatRoom() {
 
   const peerData = peerIdNum != null ? peersByUserId[peerIdNum] ?? null : null;
 
-  // 방 삭제 (나가기)
+  // 방 나가기
   async function handleLeaveRoom() {
     if (!roomId) return;
     const ok = window.confirm(
@@ -132,7 +135,7 @@ export default function ChatRoom() {
     }
   }
 
-  // === 스크롤/읽음 유틸 ===
+  // === 스크롤 유틸 ===
   const isNearBottom = useCallback(() => {
     const el = messagesWrapRef.current;
     if (!el) return true;
@@ -152,7 +155,17 @@ export default function ChatRoom() {
     [isNearBottom]
   );
 
-  // 방 레벨 unread 카운터 0
+  // ✅ 첫 로드 점프 스크롤
+  const jumpToBottom = useCallback(() => {
+    const el = messagesWrapRef.current;
+    if (!el) return;
+    const prev = el.style.scrollBehavior;
+    el.style.scrollBehavior = "auto";
+    el.scrollTop = el.scrollHeight;
+    el.style.scrollBehavior = prev || "";
+  }, []);
+
+  // 읽음 처리
   const markRoomUnreadZero = useCallback(async (roomId, userIdStr) => {
     try {
       const roomRef = doc(db, "chatRooms", roomId);
@@ -162,35 +175,30 @@ export default function ChatRoom() {
     }
   }, []);
 
-  // 메시지 단위 읽음 처리 (내 userId를 readBy에 기록)
-  const markAllAsRead = useCallback(
-    async (roomId, userIdStr, list) => {
-      if (!roomId || !userIdStr || !Array.isArray(list) || list.length === 0)
-        return;
-      try {
-        const batch = writeBatch(db);
-        const msgCol = collection(db, "chatRooms", roomId, "messages");
-        let dirty = 0;
+  const markAllAsRead = useCallback(async (roomId, userIdStr, list) => {
+    if (!roomId || !userIdStr || !Array.isArray(list) || list.length === 0)
+      return;
+    try {
+      const batch = writeBatch(db);
+      const msgCol = collection(db, "chatRooms", roomId, "messages");
+      let dirty = 0;
 
-        for (const msg of list) {
-          if (msg?.readBy?.[userIdStr]) continue;
-          const msgRef = doc(msgCol, msg.id);
-          batch.update(msgRef, { [`readBy.${userIdStr}`]: true });
-          dirty++;
-          if (dirty >= 450) break; // 배치 안전선
-        }
-
-        if (dirty > 0) {
-          await batch.commit();
-        }
-      } catch (e) {
-        console.warn("markAllAsRead failed", e);
+      for (const msg of list) {
+        if (msg?.readBy?.[userIdStr]) continue;
+        const msgRef = doc(msgCol, msg.id);
+        batch.update(msgRef, { [`readBy.${userIdStr}`]: true });
+        dirty++;
+        if (dirty >= 450) break;
       }
-    },
-    []
-  );
 
-  // 조건 맞으면 읽음 처리 트리거
+      if (dirty > 0) {
+        await batch.commit();
+      }
+    } catch (e) {
+      console.warn("markAllAsRead failed", e);
+    }
+  }, []);
+
   const maybeMarkAsRead = useCallback(
     (list) => {
       if (!roomId || !myIdStr || !Array.isArray(list) || list.length === 0)
@@ -225,6 +233,19 @@ export default function ChatRoom() {
         }));
         setMessages(newMessages);
 
+        // ✅ 첫 로드: 점프 스크롤
+        if (firstLoadRef.current) {
+          firstLoadRef.current = false;
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              jumpToBottom();
+              maybeMarkAsRead(newMessages);
+            });
+          });
+          return;
+        }
+
+        // 이후: 부드러운 스크롤
         const added = snapshot.docChanges().some((c) => c.type === "added");
         if (added) maybeMarkAsRead(newMessages);
         smartScrollToBottom();
@@ -235,7 +256,7 @@ export default function ChatRoom() {
     );
 
     return () => unsub();
-  }, [authReady, roomId, myIdNum, maybeMarkAsRead, smartScrollToBottom]);
+  }, [authReady, roomId, myIdNum, maybeMarkAsRead, smartScrollToBottom, jumpToBottom]);
 
   // 포커스/가시성 변화 시 읽음 처리
   useEffect(() => {
@@ -256,7 +277,7 @@ export default function ChatRoom() {
     }
   }, [authReady, roomId, myIdStr, messages, markAllAsRead, markRoomUnreadZero]);
 
-  // iOS 키보드/뷰포트 대응
+  // iOS 뷰포트 대응
   useEffect(() => {
     const handleResize = () => {
       if (!chatroomRef.current || !inputWrapperRef.current) return;
@@ -292,7 +313,6 @@ export default function ChatRoom() {
         const newMsgRef = doc(msgColRef);
         const now = serverTimestamp();
 
-        // 보낸 사람은 자동 읽음
         tx.set(newMsgRef, {
           text,
           senderId: myIdNum,
@@ -301,17 +321,13 @@ export default function ChatRoom() {
         });
 
         tx.update(roomRef, {
-          lastMessage: {
-            text,
-            senderId: myIdNum,
-            createdAt: now,
-          },
+          lastMessage: { text, senderId: myIdNum, createdAt: now },
           [`unread.${String(receiverIdNum)}`]: increment(1),
         });
       });
 
       setInput("");
-      refocusInput(); // 포커스 유지
+      refocusInput();
       smartScrollToBottom(true);
     } catch (e) {
       console.error("sendMessage failed:", e);
@@ -320,14 +336,12 @@ export default function ChatRoom() {
     }
   }
 
-  // 폼 제출 (Enter → submit)
   function handleSubmit(e) {
     e.preventDefault();
     if (!sending) sendMessage();
     refocusInput();
   }
 
-  // IME 조합 중 Enter 방지
   function handleKeyDown(e) {
     if (e.key === "Enter" && composingRef.current) {
       e.preventDefault();
@@ -335,9 +349,7 @@ export default function ChatRoom() {
     }
   }
 
-  // 입력영역 아무데나 터치해도 포커스 열기 (iOS 보강)
   function handleInputWrapperTouchEnd(e) {
-    // 버튼/아이콘 아닌 곳 터치 시에도 input에 포커스 줌
     const tag = (e.target.tagName || "").toUpperCase();
     if (tag !== "INPUT" && tag !== "TEXTAREA" && inputRef.current) {
       refocusInput();
@@ -363,52 +375,28 @@ export default function ChatRoom() {
         <button className="back-btn" onClick={() => navigate("/chat")}>
           ←
         </button>
-
         {peerData ? (
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              cursor: "pointer",
-              flex: 1,
-            }}
+            style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", flex: 1 }}
             onClick={() => setShowProfile(true)}
           >
             <img
               src={peerData.typeImageUrl2}
               alt="avatar"
-              style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                objectFit: "cover",
-              }}
+              style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }}
             />
             <div>
               <div style={{ fontWeight: "bold" }}>{peerData.name}</div>
-              <div style={{ fontSize: "0.8rem", color: "#666" }}>
-                {peerData.department}
-              </div>
+              <div style={{ fontSize: "0.8rem", color: "#666" }}>{peerData.department}</div>
             </div>
           </div>
         ) : (
-          <span className="title" style={{ flex: 1 }}>
-            채팅방
-          </span>
+          <span className="title" style={{ flex: 1 }}>채팅방</span>
         )}
-
         <button
           className="leave-btn"
           onClick={handleLeaveRoom}
-          style={{
-            marginLeft: "auto",
-            background: "none",
-            border: "none",
-            fontSize: "0.9rem",
-            color: "#e74c3c",
-            cursor: "pointer",
-          }}
+          style={{ marginLeft: "auto", background: "none", border: "none", fontSize: "0.9rem", color: "#e74c3c", cursor: "pointer" }}
         >
           나가기
         </button>
@@ -419,10 +407,9 @@ export default function ChatRoom() {
         {messages.map((msg) => {
           const isMe = Number(msg.senderId) === myIdNum;
           const senderData = peersByUserId[Number(msg.senderId)] || {};
-          const peerHasRead =
-            isMe && peerIdStr ? Boolean(msg?.readBy?.[peerIdStr]) : false;
+          const peerHasRead = isMe && peerIdStr ? Boolean(msg?.readBy?.[peerIdStr]) : false;
 
-        return (
+          return (
             <div key={msg.id} className={`chat-msg ${isMe ? "me" : "other"}`}>
               {!isMe && (
                 <img
@@ -434,9 +421,7 @@ export default function ChatRoom() {
                 />
               )}
               <div className="bubble-wrap">
-                {!isMe && senderData.name && (
-                  <div className="name">{senderData.name}</div>
-                )}
+                {!isMe && senderData.name && <div className="name">{senderData.name}</div>}
                 <div className="bubble">{msg.text}</div>
                 <div className="time">
                   {formatTime(msg.createdAt)}
@@ -453,14 +438,14 @@ export default function ChatRoom() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 입력창 (form + submit) */}
+      {/* 입력창 */}
       <form
         className="chatroom-input"
         ref={inputWrapperRef}
         onSubmit={handleSubmit}
-        onTouchEnd={handleInputWrapperTouchEnd}   // iOS 터치-포커스 보강
-        onPointerUp={handleInputWrapperTouchEnd}  // 일부 브라우저 보강
-        style={{ zIndex: 200 }}                   // 메뉴보다 높게
+        onTouchEnd={handleInputWrapperTouchEnd}
+        onPointerUp={handleInputWrapperTouchEnd}
+        style={{ zIndex: 200 }}
       >
         <input
           autoFocus
@@ -470,22 +455,19 @@ export default function ChatRoom() {
           onKeyDown={handleKeyDown}
           onCompositionStart={() => (composingRef.current = true)}
           onCompositionEnd={() => (composingRef.current = false)}
-          onFocus={unlockBodyScroll}  // 포커스 시 body unlock (iOS 키보드 오픈 안정화)
-          onBlur={lockBodyScroll}     // 블러 시 다시 잠금
+          onFocus={unlockBodyScroll}
+          onBlur={lockBodyScroll}
           placeholder="메세지를 입력해주세요."
           inputMode="text"
           enterKeyHint="send"
-          // sending 중에도 disabled 금지 → 포커스 유지
           disabled={!Number.isFinite(myIdNum) || !roomId}
         />
         <button
           type="submit"
           className="send-btn"
-          onMouseDown={(e) => e.preventDefault()} // 버튼이 포커스 훔치지 않게
+          onMouseDown={(e) => e.preventDefault()}
           onTouchStart={(e) => e.preventDefault()}
-          disabled={
-            sending || !input.trim() || !Number.isFinite(myIdNum) || !roomId
-          }
+          disabled={sending || !input.trim() || !Number.isFinite(myIdNum) || !roomId}
           aria-busy={sending}
         >
           <FaArrowUp size={20} color="white" />
@@ -496,11 +478,7 @@ export default function ChatRoom() {
       {showProfile && peerIdNum != null && (
         <div className="modal-overlay" onClick={() => setShowProfile(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <YouProfile
-              userId={peerIdNum}
-              onClose={() => setShowProfile(false)}
-              fromMatching={false}
-            />
+            <YouProfile userId={peerIdNum} onClose={() => setShowProfile(false)} fromMatching={false} />
           </div>
         </div>
       )}
