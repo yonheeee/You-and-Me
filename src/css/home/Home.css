@@ -101,7 +101,6 @@
   display: flex;
   gap: 2rem;
   justify-content: center;
-  padding-bottom: 5rem;
   flex-wrap: wrap; /* 작은 화면에서는 세로 배치 */
 }
 
