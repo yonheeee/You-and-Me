@@ -256,7 +256,7 @@
 }
 
 .credits-label {
-  flex: 0 0 7.2rem;              /* 라벨 고정폭 */
+  flex: 0 0 4.2rem;              /* 라벨 고정폭 */
   font-size: 0.8rem;
   font-weight: 800;
   color: #ff5a91;
