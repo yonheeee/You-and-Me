@@ -1,13 +1,34 @@
 // src/jsx/ReceiveSignal.jsx
 import React, { useEffect, useState } from "react";
 import "../../css/home/ReceiveSignal.css";
-import YouProfile from "../mypage/YouProfile.jsx"; // ✅ 경로 확인
+import YouProfile from "../mypage/YouProfile.jsx";
+import api from "../../api/axios.js";
 
-export default function ReceiveSignal({ signals, onAccept, onReject /* onOpenProfile 제거 */ }) {
+export default function ReceiveSignal({ onAccept, onReject }) {
+  const [signals, setSignals] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
 
-  // ✅ 모달 열릴 때 배경 스크롤 잠금 (ChatRoom 방식과 동일)
+  // ✅ 받은 신호 주기적으로 가져오기 (5초마다)
+  useEffect(() => {
+    let timer;
+
+    const fetchSignals = async () => {
+      try {
+        const res = await api.get("/signals/received");
+        setSignals(res.data || []);
+      } catch (err) {
+        console.error("❌ 받은 신호 불러오기 실패:", err);
+      }
+    };
+
+    fetchSignals(); // 첫 로딩
+    timer = setInterval(fetchSignals, 5000); // ⏱ 5초마다 실행
+
+    return () => clearInterval(timer); // 언마운트 시 정리
+  }, []);
+
+  // ✅ 모달 열릴 때 배경 스크롤 잠금
   useEffect(() => {
     if (!profileOpen) return;
     const prev = document.body.style.overflow;
@@ -17,7 +38,7 @@ export default function ReceiveSignal({ signals, onAccept, onReject /* onOpenPro
     };
   }, [profileOpen]);
 
-  // (선택) ESC로 닫기
+  // ESC 닫기
   useEffect(() => {
     if (!profileOpen) return;
     const onKey = (e) => e.key === "Escape" && setProfileOpen(false);
@@ -49,8 +70,6 @@ export default function ReceiveSignal({ signals, onAccept, onReject /* onOpenPro
     if (!uid) return;
     setSelectedUserId(uid);
     setProfileOpen(true);
-
-    // 필요 시 부모 위임을 원하면 여기서 onOpenProfile?.(uid) 호출 가능
   };
 
   if (!signals || signals.length === 0) {
@@ -69,7 +88,7 @@ export default function ReceiveSignal({ signals, onAccept, onReject /* onOpenPro
               key={signal.signalId}
               className={`receive-card ${isDeclined ? "receive-declined" : ""}`}
             >
-              {/* ✅ DECLINED 아닐 때만 클릭 → 내부 모달 오픈 */}
+              {/* DECLINED 아닐 때만 클릭 → 프로필 모달 오픈 */}
               <div
                 className="receive-info"
                 onClick={() => !isDeclined && userId && handleOpen(signal)}
@@ -119,7 +138,7 @@ export default function ReceiveSignal({ signals, onAccept, onReject /* onOpenPro
         })}
       </div>
 
-      {/* ✅ ChatRoom과 동일한 마크업과 동작 */}
+      {/* 프로필 모달 */}
       {profileOpen && selectedUserId && (
         <div
           className="modal-overlay"
@@ -127,13 +146,10 @@ export default function ReceiveSignal({ signals, onAccept, onReject /* onOpenPro
           role="dialog"
           aria-modal="true"
         >
-          <div
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <YouProfile
               userId={selectedUserId}
-              onClose={() => setProfileOpen(false)}  // X 버튼 닫힘
+              onClose={() => setProfileOpen(false)}
             />
           </div>
         </div>
