@@ -18,14 +18,14 @@ export default function DrinkMenu() {
     },
     {
       id: "americano",
-      name: "아이스 아메리카노",
-      price: 2000,
-      desc: "깔끔하고 시원한 기본템! 언제나 인기 있는 선택이에요.",
+      name: "블랙하트",
+      price: 1500,
+      desc: "깔끔하고 시원한 커피! 언제나 인기 있는 선택이에요.",
       image: americanoImg,
     },
     {
       id: "icedtea",
-      name: "아이스티",
+      name: "피치 못할 사정",
       price: 1500,
       desc: "상큼 달콤한 시원함! 누구나 좋아하는 음료예요.",
       image: icedTeaImg,
