@@ -6,6 +6,8 @@ import Map from "../../image/home/map.png";
 import MapInfo from "../../image/home/mapinfo.png";
 import QandA from "../../image/home/q&a.svg";
 
+import { ReactComponent as InstaIcon } from "../../image/home/instagram.svg";
+
 import DrinkMenu from "../home/DrinkMenu";
 import PopUp from "./PopUp";
 import { Link } from "react-router-dom";
@@ -28,6 +30,25 @@ function Home() {
     animate: { opacity: 1, transition: { duration: 0.35 } },
     exit: { opacity: 0, transition: { duration: 0.35 } },
   };
+
+  // 팀 데이터 (인스타 링크 채워 넣기)
+  const TEAM = [
+    {
+      role: "디자인",
+      person: "시각디자인학과 23 문지원",
+      ig: "https://instagram.com/문지원_아이디",
+    },
+    {
+      role: "프론트엔드",
+      person: "항공소프트웨어공학과 22 김형석",
+      ig: "https://instagram.com/김형석_아이디",
+    },
+    {
+      role: "백엔드",
+      person: "항공소프트웨어공학과 22 박찬우",
+      ig: "https://instagram.com/박찬우_아이디",
+    },
+  ];
 
   return (
     <>
@@ -87,7 +108,7 @@ function Home() {
               <div className="credits-card">
                 <h3 className="credits-title">
                   <img
-                    src={`${process.env.PUBLIC_URL}/멋사로고.png`} // 또는 src="/멋사로고.png"
+                    src={`${process.env.PUBLIC_URL}/멋사로고.png`}
                     alt="멋사 로고"
                     className="credits-logo"
                   />
@@ -96,27 +117,26 @@ function Home() {
                 </h3>
 
                 <dl className="credits-list">
-                  <div className="credits-item">
-                    <dt className="credits-label">디자인</dt>
-                    <dd className="credits-value">
-                      시각디자인학과
-                      <br /> 23 문지원
-                    </dd>
-                  </div>
-                  <div className="credits-item">
-                    <dt className="credits-label">프론트엔드</dt>
-                    <dd className="credits-value">
-                      항공소프트웨어공학과
-                      <br /> 22 김형석
-                    </dd>
-                  </div>
-                  <div className="credits-item">
-                    <dt className="credits-label">백엔드</dt>
-                    <dd className="credits-value">
-                      항공소프트웨어공학과
-                      <br /> 22 박찬우
-                    </dd>
-                  </div>
+                  {TEAM.map((m) => (
+                    <div className="credits-item" key={m.role}>
+                      <dt className="credits-label">{m.role}</dt>
+                      <dd className="credits-value">{m.person}</dd>
+
+                      {/* 우측 인스타 아이콘 */}
+                      {m.ig && (
+                        <a
+                          className="credits-ig"
+                          href={m.ig}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${m.role} 인스타그램 열기`}
+                          title="Instagram"
+                        >
+                          <InstaIcon className="ig-icon" />
+                        </a>
+                      )}
+                    </div>
+                  ))}
                 </dl>
               </div>
             </section>
