@@ -1,41 +1,21 @@
 // src/jsx/SentSignalList.jsx
 import React, { useState, useEffect } from "react";
 import "../../css/home/SentSignalList.css";
-import YouProfile from "../mypage/YouProfile.jsx";
-import api from "../../api/axios.js";
+import YouProfile from "../mypage/YouProfile.jsx"; // 경로 확인
 
-export default function SentSignalList() {
-  const [signals, setSignals] = useState([]);
+export default function SentSignalList({ signals /*, onOpenProfile */ }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
 
-  // ✅ 5초마다 보낸 신호 갱신
+  // ✅ 모달 열릴 때 배경 스크롤 잠금 (ChatRoom 느낌 유지)
   useEffect(() => {
-    let timer;
-
-    const fetchSignals = async () => {
-      try {
-        const res = await api.get("/signals/sent");
-        setSignals(res.data || []);
-      } catch (err) {
-        console.error("❌ 보낸 신호 불러오기 실패:", err);
-      }
-    };
-
-    fetchSignals(); // 첫 로딩
-    timer = setInterval(fetchSignals, 5000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // ✅ 모달 열릴 때 배경 스크롤 잠금
-  useEffect(() => {
-    if (!profileOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev || "auto";
-    };
+    if (profileOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev || "auto";
+      };
+    }
   }, [profileOpen]);
 
   const formatRelativeTime = (isoString) => {
@@ -63,6 +43,10 @@ export default function SentSignalList() {
 
     setSelectedUserId(uid);
     setProfileOpen(true);
+
+    // ❗ ChatRoom 스타일로 내부 모달을 항상 사용
+    // 만약 상위에서 onOpenProfile을 계속 쓰고 싶다면 여기서 호출 추가 가능
+    // onOpenProfile?.(uid);
   };
 
   if (!signals || signals.length === 0) {
@@ -107,7 +91,7 @@ export default function SentSignalList() {
         })}
       </div>
 
-      {/* 모달 */}
+      {/* ✅ ChatRoom과 같은 마크업: modal-overlay / modal-content */}
       {profileOpen && selectedUserId && (
         <div
           className="modal-overlay"
@@ -115,10 +99,13 @@ export default function SentSignalList() {
           role="dialog"
           aria-modal="true"
         >
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <YouProfile
               userId={selectedUserId}
-              onClose={() => setProfileOpen(false)}
+              onClose={() => setProfileOpen(false)} // X 버튼 닫힘
             />
           </div>
         </div>
