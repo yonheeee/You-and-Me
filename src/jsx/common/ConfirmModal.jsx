@@ -58,9 +58,9 @@ export default function ConfirmModal({
           {showUser && user && (
             <>
               {user.avatar ? (
-                <img src={user.avatar} alt="profile" className="profile-img" />
+                <img src={user.avatar} alt="profile" className="confirm-profile-img" />
               ) : (
-                <div className="profile-placeholder" />
+                <div className="confirm-profile-placeholder" />
               )}
               <h3>{user.name}</h3>
               <p className="department">{user.department || "소속 없음"}</p>

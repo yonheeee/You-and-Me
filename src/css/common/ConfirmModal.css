@@ -83,8 +83,8 @@
   padding: 2rem;
 }
 
-.profile-img,
-.profile-placeholder {
+.confirm-profile-img,
+.confirm-profile-placeholder {
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
@@ -92,14 +92,14 @@
   margin: 0 auto 1.2rem;
 }
 
-.profile-img {
+.confirm-profile-img {
   object-fit: cover;
   border: 0.2rem solid #fff3;
   box-shadow: 0 0.6rem 2rem rgba(0,0,0,0.12);
 }
 
 /* Skeleton placeholder */
-.profile-placeholder {
+.confirm-profile-placeholder {
   background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%);
   background-size: 400% 100%;
   animation: cm-shimmer 1.4s ease infinite;
