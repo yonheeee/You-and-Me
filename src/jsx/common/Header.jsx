@@ -1,7 +1,7 @@
 // src/components/common/Header.jsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Logo from "../../image/loginPage/logo.svg";
+import Logo from "../../image/loginPage/logo2.png";
 import TicketLogo from "../../image/home/ticket.svg";
 import CouponSheet from "./CouponSheet";
 import useUserStore from "../../api/userStore.js";   // ✅ zustand 스토어
