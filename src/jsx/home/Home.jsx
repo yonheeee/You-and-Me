@@ -34,6 +34,12 @@ function Home() {
   // 팀 데이터 (인스타 링크 채워 넣기)
   const TEAM = [
     {
+      role: "PM",
+      major: "항공소프트웨어공학과",
+      person: "21 김연희",
+      ig: "https://instagram.com/yonhee0706",
+    },
+    {
       role: "디자인",
       major: "시각디자인학과",
       person: "시디 에스파 중 카리나 23 문지원",
