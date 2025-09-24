@@ -36,7 +36,7 @@ function Home() {
     {
       role: "디자인",
       major: "시각디자인학과",
-      person: "시디 최고 아웃풋 23 문지원",
+      person: "시디 에스파 중 카리나 23 문지원",
       ig: "https://instagram.com/1m0zi",
     },
     {
