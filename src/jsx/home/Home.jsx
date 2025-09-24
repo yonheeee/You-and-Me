@@ -42,7 +42,7 @@ function Home() {
     {
       role: "디자인",
       major: "시각디자인학과",
-      person: "시디 에스파 중 카리나 23 문지원",
+      person: "시디 카리나 23 문지원",
       ig: "https://instagram.com/1m0zi",
     },
     {
@@ -54,7 +54,7 @@ function Home() {
     {
       role: "백엔드",
       major: "항공소프트웨어공학과",
-      person: "항소 대표 에겐남 01주 차량소유주 22 박찬우",
+      person: "항소 최우식 22 박찬우",
       ig: "https://instagram.com/chanwoo0321",
     },
   ];
