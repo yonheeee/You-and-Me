@@ -6,7 +6,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  background: #fff2fc; /* 하단 배경색 */
+  background: #fff2fc;
   overflow: hidden;
 }
 
@@ -67,8 +67,7 @@
   justify-content: center;
   align-items: center;
   margin: 2rem auto;
-
-  max-width: 100%; /* 이미지 크기에 맞춰 */
+  max-width: 100%;
 }
 
 .matching-banner-img {
@@ -83,7 +82,7 @@
   left: 12%;
   transform: translateY(-50%);
   text-align: left;
-  color: #333; /* 글씨 색 (배경에 맞춰 조절) */
+  color: #333;
 }
 
 .matching-banner-text h2 {
@@ -96,21 +95,33 @@
   font-size: 1rem;
 }
 
-/* 음료, 부스 위치 */
+/* ===== 음료 + 부스 위치: 항상 세로 배치 ===== */
 .drink-and-map {
   display: flex;
-  gap: 2rem;
-  justify-content: center;
-  flex-wrap: wrap; /* 작은 화면에서는 세로 배치 */
+  flex-direction: column; /* ✅ 세로로 고정 */
+  align-items: stretch;
+  gap: 1.2rem;
+}
+
+/* DrinkMenu 내부가 float을 써도 부모에서 정리 */
+.drink-menu-block {
+  width: 100%;
+}
+.drink-menu-block::after {
+  content: "";
+  display: block;
+  clear: both; /* ✅ clearfix */
 }
 
 .booth-location {
+  width: 100%;
+  clear: both; /* ✅ float 옆으로 흐르지 않게 */
   background: #fff;
   border-radius: 1rem;
   padding: 1rem 2rem 2rem 2rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   max-width: 85%;
-  flex: 1;
+  margin: 0 auto;
   text-align: center;
 }
 
@@ -121,7 +132,7 @@
 }
 
 .booth-map {
-  background: #fff; /* 흰색 배경 */
+  background: #fff;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -133,11 +144,12 @@
 .booth-map img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
 }
 
 .booth-map-info {
-  background: #fff; /* 흰색 배경 */
-  border-top: 1px solid black;
+  background: #fff;
+  border-top: 1px solid #000;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -148,6 +160,7 @@
 .booth-map-info img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
 }
 
 /* Q&A 버튼 섹션 */
@@ -160,12 +173,12 @@
 
 .QandA-btn {
   width: 85%;
-  min-height: 72px; /* 고정 높이 대신 최소 높이 */
-  height: 10vh; /* 원래 값 유지 */
+  min-height: 72px;
+  height: 10vh;
   max-height: 120px;
-  display: flex; /* ✅ 텍스트와 이미지를 좌우 배치 */
+  display: flex;
   align-items: center;
-  justify-content: space-between; /* ✅ 왼쪽 텍스트, 오른쪽 이미지 */
+  justify-content: space-between;
   gap: 1rem;
   background: linear-gradient(to right, #ffedf8 40%, #f6b7dd 100%);
   color: #575757;
@@ -178,7 +191,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* 왼쪽 텍스트들 줄바꿈 정리 */
+/* 왼쪽 텍스트 줄바꿈 정리 */
 .QandA-btn .Q-title {
   line-height: 1.2;
   margin-bottom: 0.25rem;
@@ -192,7 +205,7 @@
   flex: 0 0 auto;
   height: 100%;
   max-height: 80px;
-  width: 10;
+  width: auto;
   margin-left: auto;
   object-fit: contain;
 }
@@ -234,7 +247,7 @@
   font-size: 0.7rem;
   font-weight: 700;
   color: #ffffff;
-  background: #ff5a91; /* 앱 포인트 컬러 */
+  background: #ff5a91;
   padding: 0.4rem 0.8rem;
   border-radius: 1.2rem;
   letter-spacing: 0.02em;
@@ -266,9 +279,9 @@
 /* dd 묶음 (세로로) */
 .credits-info {
   display: flex;
-  flex-direction: column;  /* ✅ 세로 쌓기 */
+  flex-direction: column; /* ✅ 세로 쌓기 */
   gap: 0.3rem;
-  flex: 1;                 /* 남은 공간 차지 */
+  flex: 1;               /* 남은 공간 차지 */
 }
 
 .credit-value {
@@ -285,11 +298,11 @@
 
 /* 로고 아이콘 */
 .credits-logo {
-  width: 2.4rem; /* 24px */
+  width: 2.4rem;
   height: 2.4rem;
   object-fit: contain;
   border-radius: 0.6rem;
-  background: #ffffff; /* 투명 PNG 대비 */
+  background: #ffffff;
   padding: 0.3rem;
   box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.08);
 }
@@ -305,14 +318,12 @@
   border-radius: 9999px;
   border: 0.1rem solid #ffd7e7;
   background: #ffffff;
-  color: #ff5a91; /* 아이콘 색 (svg는 currentColor) */
+  color: #ff5a91; /* svg는 currentColor */
   transition: filter 120ms ease, background 120ms ease, transform 80ms ease;
 }
-
 .credits-ig:active {
   transform: translateY(0.1rem);
 }
-
 .credits-ig:focus-visible {
   outline: 0.2rem solid #ff5a91;
   outline-offset: 0.2rem;
