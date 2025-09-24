@@ -5,7 +5,7 @@ import "../../css/ranking/Ranking.css";
 import King from "../../image/ranking/king.svg";
 
 /** ===== 더미 데이터 스위치 ===== */
-const USE_DUMMY = true;
+const USE_DUMMY = false;
 
 /** ===== 더미 데이터 ===== */
 // 학과 - 받은 플러팅
