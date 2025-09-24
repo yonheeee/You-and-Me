@@ -40,7 +40,7 @@ export default function DrinkMenu() {
 
       {/* 상세 정보 영역 */}
       <div className="drink-detail">
-        <img src={selected.image} alt={selected.name} className="drink-image" />
+        {/* <img src={selected.image} alt={selected.name} className="drink-image" /> */}
         <div className="drink-info">
           <h3>{selected.name}</h3>
           <span className="drink-price">{selected.price.toLocaleString()} ₩</span>
