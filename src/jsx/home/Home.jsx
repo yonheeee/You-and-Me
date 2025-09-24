@@ -36,19 +36,19 @@ function Home() {
     {
       role: "디자인",
       major: "시각디자인학과",
-      person: " 23 문지원",
+      person: "시디 최고 아웃풋 23 문지원",
       ig: "https://instagram.com/1m0zi",
     },
     {
       role: "프론트엔드",
       major: "항공소프트웨어공학과",
-      person: "22 김형석",
+      person: "항소 남주혁 22 김형석",
       ig: "https://instagram.com/bro_stone_03",
     },
     {
       role: "백엔드",
       major: "항공소프트웨어공학과",
-      person: "22 박찬우",
+      person: "항소 대표 에겐남 01주 차량소유주 22 박찬우",
       ig: "https://instagram.com/chanwoo0321",
     },
   ];
