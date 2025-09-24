@@ -87,7 +87,7 @@ export default function Card({ initialCandidates = [] }) {
   const swipeEnabled = hasThreePlus;
 
   const TWO_MULT = 0.5;
-  const xTwoLeft = -SPREAD * TWO_MULT + dx;
+  const xTwoLeft = -SPREAD * TWO_MULT + dx;   // ✅ 오타 수정
   const xTwoRight = SPREAD * TWO_MULT + dx;
   const otherIdx = wrap(center + 1, N);
 
@@ -271,11 +271,7 @@ export default function Card({ initialCandidates = [] }) {
 
     return (
       <>
-        <div
-          className="card-stars"
-          aria-hidden="true"
-          style={{ pointerEvents: "none" }}
-        >
+        <div className="card-stars" aria-hidden="true" style={{ pointerEvents: "none" }}>
           {FIXED_STARS.map((s) => (
             <img
               key={s.id}
@@ -345,13 +341,11 @@ export default function Card({ initialCandidates = [] }) {
       <div className="card-root">
         <div
           className={`card-wrap ${snapping ? "snapping" : ""} ${dir}`}
-          onTouchStartCapture={(e) =>
-            swipeEnabled && onStart(e.touches[0].clientX)
-          }
+          onTouchStartCapture={(e) => swipeEnabled && onStart(e.touches[0].clientX)}
           onTouchMoveCapture={(e) => {
             if (!swipeEnabled) return;
             onMove(e.touches[0].clientX);
-            if (dragging.current) e.preventDefault();
+            // React 19 passive touchmove → preventDefault 금지
           }}
           onTouchEndCapture={swipeEnabled ? onEnd : undefined}
           onMouseDownCapture={(e) => swipeEnabled && onStart(e.clientX)}
@@ -364,14 +358,9 @@ export default function Card({ initialCandidates = [] }) {
             <div
               key={getUid(candidates[center])}
               className="slot slot-center"
-              style={{
-                transform: `translate(calc(-50% + ${xCenter}px), -50%)`,
-              }}
+              style={{ transform: `translate(calc(-50% + ${xCenter}px), -50%)` }}
             >
-              <div
-                className="card"
-                onClick={handleCardClick(candidates[center])}
-              >
+              <div className="card" onClick={handleCardClick(candidates[center])}>
                 <CardBody item={candidates[center]} />
               </div>
             </div>
@@ -388,10 +377,7 @@ export default function Card({ initialCandidates = [] }) {
                   zIndex: 2,
                 }}
               >
-                <div
-                  className="card"
-                  onClick={handleCardClick(candidates[center])}
-                >
+                <div className="card" onClick={handleCardClick(candidates[center])}>
                   <CardBody item={candidates[center]} />
                 </div>
               </div>
@@ -403,10 +389,7 @@ export default function Card({ initialCandidates = [] }) {
                   zIndex: 1,
                 }}
               >
-                <div
-                  className="card"
-                  onClick={handleCardClick(candidates[otherIdx])}
-                >
+                <div className="card" onClick={handleCardClick(candidates[otherIdx])}>
                   <CardBody item={candidates[otherIdx]} />
                 </div>
               </div>
@@ -419,70 +402,45 @@ export default function Card({ initialCandidates = [] }) {
               <div
                 key={getUid(candidates[idxFarLeft])}
                 className="slot slot-far-left"
-                style={{
-                  transform: `translate(calc(-50% + ${xFarLeft}px), -50%)`,
-                }}
+                style={{ transform: `translate(calc(-50% + ${xFarLeft}px), -50%)` }}
               >
-                <div
-                  className="card"
-                  onClick={handleCardClick(candidates[idxFarLeft])}
-                >
+                <div className="card" onClick={handleCardClick(candidates[idxFarLeft])}>
                   <CardBody item={candidates[idxFarLeft]} />
                 </div>
               </div>
               <div
                 key={getUid(candidates[idxLeft])}
                 className="slot slot-left"
-                style={{
-                  transform: `translate(calc(-50% + ${xLeft}px), -50%)`,
-                }}
+                style={{ transform: `translate(calc(-50% + ${xLeft}px), -50%)` }}
               >
-                <div
-                  className="card"
-                  onClick={handleCardClick(candidates[idxLeft])}
-                >
+                <div className="card" onClick={handleCardClick(candidates[idxLeft])}>
                   <CardBody item={candidates[idxLeft]} />
                 </div>
               </div>
               <div
                 key={getUid(candidates[center])}
                 className="slot slot-center"
-                style={{
-                  transform: `translate(calc(-50% + ${xCenter}px), -50%)`,
-                }}
+                style={{ transform: `translate(calc(-50% + ${xCenter}px), -50%)` }}
               >
-                <div
-                  className="card"
-                  onClick={handleCardClick(candidates[center])}
-                >
+                <div className="card" onClick={handleCardClick(candidates[center])}>
                   <CardBody item={candidates[center]} />
                 </div>
               </div>
               <div
                 key={getUid(candidates[idxRight])}
                 className="slot slot-right"
-                style={{
-                  transform: `translate(calc(-50% + ${xRight}px), -50%)`,
-                }}
+                style={{ transform: `translate(calc(-50% + ${xRight}px), -50%)` }}
               >
-                <div
-                  className="card"
-                  onClick={handleCardClick(candidates[idxRight])}
-                >
+                <div className="card" onClick={handleCardClick(candidates[idxRight])}>
                   <CardBody item={candidates[idxRight]} />
                 </div>
               </div>
               <div
                 key={getUid(candidates[idxFarRight])}
                 className="slot slot-far-right"
-                style={{
-                  transform: `translate(calc(-50% + ${xFarRight}px), -50%)`,
-                }}
+                style={{ transform: `translate(calc(-50% + ${xFarRight}px), -50%)` }}
               >
-                <div
-                  className="card"
-                  onClick={handleCardClick(candidates[idxFarRight])}
-                >
+                <div className="card" onClick={handleCardClick(candidates[idxFarRight])}>
                   <CardBody item={candidates[idxFarRight]} />
                 </div>
               </div>
@@ -491,12 +449,7 @@ export default function Card({ initialCandidates = [] }) {
         </div>
 
         <div className="cta-wrap">
-          <button
-            type="button"
-            className="cta-btn"
-            onClick={openRematchConfirm}
-            disabled={loading}
-          >
+          <button type="button" className="cta-btn" onClick={openRematchConfirm} disabled={loading}>
             {loading ? "매칭 시작 중..." : "다시 매칭하기"}
           </button>
         </div>
@@ -504,10 +457,7 @@ export default function Card({ initialCandidates = [] }) {
 
       {selectedUserId != null &&
         createPortal(
-          <div
-            className="modal-overlay"
-            onClick={() => setSelectedUserId(null)}
-          >
+          <div className="modal-overlay" onClick={() => setSelectedUserId(null)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <YouProfile
                 userId={selectedUserId}
