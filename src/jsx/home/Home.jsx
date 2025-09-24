@@ -36,7 +36,7 @@ function Home() {
     {
       role: "PM",
       major: "항공소프트웨어공학과",
-      person: "21 김연희",
+      person: "항소 공주 21 김연희",
       ig: "https://instagram.com/yonhee0706",
     },
     {
