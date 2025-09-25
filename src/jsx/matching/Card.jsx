@@ -250,20 +250,20 @@ export default function Card({ initialCandidates = [] }) {
     return arr.slice(0, idx).join("") + "\n" + arr.slice(idx).join("");
   };
 
-  // ✅ 이미지 우선순위: 1) profileImageUrl → 2) typeImageUrl (에러 시 폴백)
+  // ✅ 이미지 우선순위: 1) profileImageUrl → 2) typeImageUrl2 (에러 시 폴백)
   const CardBody = ({ item = {} }) => {
     const {
       name = "이름 없음",
       department = "학과 없음",
       introduce = "소개 없음",
       profileImageUrl,
-      typeImageUrl2,
+      typeImageUrl2, // ← 여기!
     } = item;
 
     const msgText = breakAtHalf(introduce ?? "");
 
     const primary = (profileImageUrl ?? "").trim() || null;
-    const fallback = (typeImageUrl2 ?? "").trim() || null;
+    const fallback = (typeImageUrl2 ?? "").trim() || null; // ← 여기!
     const urlChain = [primary, fallback].filter(Boolean);
 
     const [imgIndex, setImgIndex] = useState(0);
