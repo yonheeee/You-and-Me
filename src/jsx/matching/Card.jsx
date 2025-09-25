@@ -257,7 +257,7 @@ export default function Card({ initialCandidates = [] }) {
       department = "학과 없음",
       introduce = "소개 없음",
       profileImageUrl,
-      typeImageUrl,
+      typeImageUrl2,
     } = item;
 
     const msgText = breakAtHalf(introduce ?? "");
