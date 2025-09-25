@@ -1,0 +1,154 @@
+/* ====== TutorHome 전용 토큰 ====== */
+:root{
+  --z-dim: 9998;
+  --z-blocker: 9999;
+  --z-spotlight: 10000;
+  --z-spotlight-top: 10001;
+  --z-hint: 10002;
+}
+
+.tur-hero{
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+}
+
+.tur-hero-logo-img {
+  margin-left: 1rem;
+}
+
+/* =========================
+   매칭 버튼: 이미지로 대체
+   spotlight는 래퍼(.tur-match-img-wrap)에 적용
+   ========================= */
+.tur-match-img-wrap{
+  position: relative;             /* 전역 .spotlight의 ::before/::after 기준점 */
+  width: min(92vw, 440px);
+  margin: 12px auto 0;
+  z-index: var(--z-spotlight);
+}
+
+.tur-match-img{
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* =========================
+   힌트 박스
+   ========================= */
+.tur-home-hint-wrap{
+  position: relative;
+  z-index: var(--z-hint);          /* dim/blocker보다 위 */
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 10px;
+  padding: 0 16px;                 /* 모바일 좌우 여백 */
+}
+
+.tur-home-hint{
+  position: relative;
+  width: min(92vw, 440px);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.22);
+  padding: 14px 14px 12px;
+  overflow: visible;
+  animation: home-hint-pop .18s ease-out; /* 키프레임 이름 유지 */
+}
+
+.tur-home-hint > .tur-home-hint-caret{
+  position: absolute;
+  top: -6px;                       /* 윗변 밖으로 6px */
+  left: 24px;                      /* 필요 시 16~32px 조정 */
+  width: 12px; height: 12px;
+  background: #fff;
+  transform: rotate(45deg);
+  border-radius: 2px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.tur-home-hint-text{
+  margin: 0 0 10px;
+  font-size: .92rem;
+  line-height: 1.55;
+  color: #575757;
+  word-break: keep-all;            /* 한글 줄바꿈 자연스럽게 */
+}
+.tur-home-hint-text .tur-home-hint-em{
+  color: #e8048d;
+  font-weight: 800;
+}
+
+.tur-home-hint-footer{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tur-home-hint-next{
+  border: 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #ff69c3;
+  color: #fff;
+  font-weight: 700;
+  font-size: .9rem;
+  opacity: .92;
+  cursor: pointer;
+}
+.tur-home-hint-next:disabled{
+  cursor: default;
+  opacity: .7;
+}
+.tur-home-hint-step{
+  font-size: .86rem;
+  color: #575757;
+}
+
+/* =========================
+   모달 딤/클릭 차단
+   ========================= */
+.tur-home-modal-dim{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: var(--z-dim);
+  pointer-events: auto;
+  touch-action: none;
+}
+.tur-home-click-blocker{
+  position: fixed; inset: 0;
+  z-index: var(--z-blocker);
+  background: transparent;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+/* =========================
+   텍스트 톤 통일
+   (영역 클래스만 tur-로 네임스페이스)
+   ========================= */
+.tur-hero-content, .tur-hero-content * {
+  color:#575757 !important;
+  fill:#575757 !important;
+}
+
+/* =========================
+   모션 선호도
+   ========================= */
+@media (prefers-reduced-motion: reduce){
+  .tur-home-hint{ animation: none; }
+}
+
+/* =========================
+   팝 애니메이션 (이름 유지)
+   ========================= */
+@keyframes home-hint-pop{
+  from{ transform: translateY(4px) scale(.98); opacity: 0; }
+  to{   transform: translateY(0)   scale(1);   opacity: 1; }
+}

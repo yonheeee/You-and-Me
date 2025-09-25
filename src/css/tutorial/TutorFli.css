@@ -1,0 +1,146 @@
+/* ====== TutorHome 전용 토큰 ====== */
+:root{
+  --z-dim: 9998;
+  --z-blocker: 9999;
+  --z-spotlight: 10000;
+  --z-spotlight-top: 10001;
+  --z-hint: 10002;
+}
+
+/* 배너/텍스트 레이어 */
+.fli-matching-banner { position: relative; width: 90vw; margin-left: 1.5rem; }
+
+/* 매칭 배너 이미지 */
+.fli-matching-banner-img { display:block; width:100%; height:auto; }
+
+.fli-hero{
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+/* FlirtingTabs 대신 들어간 FliImg + spotlight 래퍼 */
+.fli-hero-img-wrap{
+  position: relative;                /* ::before/::after 기준 (spotlight용) */
+  width: min(92vw, 440px);
+  margin: 16px auto 0;
+  z-index: var(--z-spotlight);       /* 배너와 자연스러운 레이어 */
+}
+.fli-hero-logo-img{ margin-left: 1rem; }
+.fli-hero-img{
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* 힌트 박스 래퍼: 배너 아래 중앙 정렬
+   ✅ spotlight보다 항상 위로 오도록 z-index 상향 */
+.fli-hint-wrap{
+  position: relative;
+  z-index: calc(var(--z-spotlight) + 20);  /* ⬅️ 핵심 변경: 이미지/spotlight 위 */
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: -70px;
+  padding: 0 16px;                 /* 모바일 좌우 여백 */
+}
+
+/* 힌트 말풍선(흰색 모달) */
+.fli-hint{
+  position: relative;
+  width: min(92vw, 440px);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.22);
+  padding: 14px 20px 12px;
+  overflow: visible;
+  animation: fli-hint-pop .18s ease-out;
+}
+
+/* 🔼 작은 사각형(화살표) — 모달 '윗쪽'으로 이동(확실히 고정) */
+.fli-hint > .fli-hint-caret{
+  position: absolute;
+  bottom: -6px;                      
+  left: 24px;                      /* 필요 시 16~32px 조정 */
+  width: 12px; height: 12px;
+  background: #fff;
+  transform: rotate(45deg);
+  border-radius: 2px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* 텍스트 */
+.fli-hint-text{
+  margin: 0 0 10px;
+  font-size: .92rem;
+  line-height: 1.55;
+  color: #575757;
+  word-break: keep-all;            /* 한글 줄바꿈 자연스럽게 */
+}
+.fli-hint-text .fli-hint-em{ color: #e8048d; font-weight: 800; }
+
+/* 하단 푸터 */
+.fli-hint-footer{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.fli-hint-next{
+  border: 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #ff69c3;
+  color: #fff;
+  font-weight: 700;
+  font-size: .9rem;
+  opacity: .92;
+  cursor: pointer;
+}
+.fli-hint-next:disabled{
+  cursor: default;
+  opacity: .7;
+}
+.fli-hint-step{
+  font-size: .86rem;
+  color: #575757;
+}
+
+/* 모달 딤/클릭 차단 */
+.fli-modal-dim{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: var(--z-dim);
+  pointer-events: auto;
+  touch-action: none;
+}
+.fli-click-blocker{
+  position: fixed; inset: 0;
+  z-index: var(--z-blocker);
+  background: transparent;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+/* 텍스트 톤 통일 (영역 유지) */
+.fli-hero-content, .fli-hero-content * { color:#575757 !important; fill:#575757 !important; }
+
+/* 모션 선호도 */
+@media (prefers-reduced-motion: reduce){
+  .fli-hint{ animation: none; }
+}
+
+/* 팝 애니메이션 */
+@keyframes fli-hint-pop{
+  from{ transform: translateY(4px) scale(.98); opacity: 0; }
+  to{   transform: translateY(0)   scale(1);   opacity: 1; }
+}
+
+@media (max-width: 380px){
+    .fli-hero{
+        margin-top: -10rem;
+    }
+}

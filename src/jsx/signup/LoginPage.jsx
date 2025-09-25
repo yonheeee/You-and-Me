@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../../css/signup/loginPage.css";
 import heartSvg from "../../image/loginPage/heart.svg";
-import logoSvg from "../../image/loginPage/logo2.png";
+import logoSvg from "../../image/loginPage/logo.svg";
 import backgroundImage from "../../image/loginPage/background.png";
 import QandA from "../../image/home/q&a.svg";
 import api from "../../api/axios";
@@ -200,9 +200,19 @@ export default function LoginOrGate() {
             </svg>
             카카오로 시작하기
           </button>
+
+          {/* ✅ 튜토리얼로 이동 버튼 */}
+          <button
+            type="button"
+            className="tutorial-btn"
+            onClick={() => navigate("/tutorial/start")}
+          >
+            튜토리얼 시작하기
+          </button>
         </div>
         {/* Q&A 버튼 */}
       </section>
+
       <section className="QandA">
         <button
           className="QandA-btn"
@@ -210,10 +220,7 @@ export default function LoginOrGate() {
           type="button"
         >
           <div className="QandA-text">
-            <div
-              className="Q-title"
-              style={{ fontSize: "20px", fontWeight: "bold" }}
-            >
+            <div className="Q-title" style={{ fontSize: "20px", fontWeight: "bold" }}>
               FAQ
             </div>
             <div className="Q-subtitle" style={{ fontSize: "14px" }}>
@@ -223,6 +230,7 @@ export default function LoginOrGate() {
           <img src={QandA} alt="큐엔에이 이미지" />
         </button>
       </section>
+
       <PopUp open={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
     </main>
   );
