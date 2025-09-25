@@ -81,6 +81,7 @@
   box-shadow:0 10px 24px rgba(216,77,174,.28);
   pointer-events:none;                /* ✅ 버튼도 클릭 통과 */
   user-select:none;
+  top: 8rem;
 }
 
 /* 튜토리얼 중 CTA는 화면 하단 '시각용' 고정 + 클릭 통과 */
