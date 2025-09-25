@@ -263,7 +263,7 @@ export default function Card({ initialCandidates = [] }) {
     const msgText = breakAtHalf(introduce ?? "");
 
     const primary = (profileImageUrl ?? "").trim() || null;
-    const fallback = (typeImageUrl ?? "").trim() || null;
+    const fallback = (typeImageUrl2 ?? "").trim() || null;
     const urlChain = [primary, fallback].filter(Boolean);
 
     const [imgIndex, setImgIndex] = useState(0);
