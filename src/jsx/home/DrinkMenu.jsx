@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import "../../css/home/DrinkMenu.css";
 
 // 이미지 import (실제 경로 맞게 수정!)
-// import lovePotionImg from "../../image/home/icetea.svg";
-// import americanoImg from "../../image/home/icetea.svg";
-// import icedTeaImg from "../../image/home/icetea.svg";
+import lovePotionImg from "../../image/home/러브포션.png";
+import americanoImg from "../../image/home/블랙하트.png";
+import icedTeaImg from "../../image/home/피치못할사정.png";
 
 export default function DrinkMenu() {
   // 상수 데이터
@@ -14,21 +14,21 @@ export default function DrinkMenu() {
       name: "러브포션",
       price: 2000,
       desc: "두근거림 충전 완료! 오직 멋사 부스에서만 만날 수 있는 마법의 음료예요.",
-      // image: lovePotionImg,
+      image: lovePotionImg,
     },
     {
       id: "americano",
       name: "블랙하트",
       price: 1500,
       desc: "깔끔하고 시원한 커피! 언제나 인기 있는 선택이에요.",
-      // image: americanoImg,
+      image: americanoImg,
     },
     {
       id: "icedtea",
       name: "피치 못할 사정",
       price: 1500,
       desc: "상큼 달콤한 시원함! 누구나 좋아하는 음료예요.",
-      // image: icedTeaImg,
+      image: icedTeaImg,
     },
   ];
 
@@ -40,7 +40,7 @@ export default function DrinkMenu() {
 
       {/* 상세 정보 영역 */}
       <div className="drink-detail">
-        {/* <img src={selected.image} alt={selected.name} className="drink-image" /> */}
+        <img src={selected.image} alt={selected.name} className="drink-image" />
         <div className="drink-info">
           <h3>{selected.name}</h3>
           <span className="drink-price">{selected.price.toLocaleString()} ₩</span>
