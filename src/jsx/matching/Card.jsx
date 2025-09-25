@@ -1,3 +1,4 @@
+// src/jsx/matching/Card.jsx
 import React, { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import api from "../../api/axios.js";
@@ -61,7 +62,7 @@ export default function Card({ initialCandidates = [] }) {
   const [dir, setDir] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ 잔상 제거용: 드래그 중 class 토글하려면 state 필요
+  // ✅ 잔상 줄이기용: 드래그 상태 클래스토글
   const [isDragging, setIsDragging] = useState(false);
   const dragging = useRef(false);
   const movedRef = useRef(false);
@@ -98,7 +99,7 @@ export default function Card({ initialCandidates = [] }) {
   const onStart = (x) => {
     if (!swipeEnabled) return;
     dragging.current = true;
-    setIsDragging(true);              // ✅ .dragging 클래스 켜기
+    setIsDragging(true);
     movedRef.current = false;
     setSnapping(false);
     setDir("");
@@ -117,7 +118,7 @@ export default function Card({ initialCandidates = [] }) {
   const onEnd = () => {
     if (!dragging.current || !swipeEnabled) return;
     dragging.current = false;
-    setIsDragging(false);             // ✅ .dragging 클래스 끄기
+    setIsDragging(false);
 
     const absDx = Math.abs(dx);
     const sign = dx < 0 ? -1 : 1;
@@ -249,6 +250,7 @@ export default function Card({ initialCandidates = [] }) {
     return arr.slice(0, idx).join("") + "\n" + arr.slice(idx).join("");
   };
 
+  // ✅ 이미지 우선순위: 1) profileImageUrl → 2) typeImageUrl (에러 시 폴백)
   const CardBody = ({ item = {} }) => {
     const {
       name = "이름 없음",
@@ -259,20 +261,20 @@ export default function Card({ initialCandidates = [] }) {
     } = item;
 
     const msgText = breakAtHalf(introduce ?? "");
+
     const primary = (profileImageUrl ?? "").trim() || null;
     const fallback = (typeImageUrl ?? "").trim() || null;
+    const urlChain = [primary, fallback].filter(Boolean);
 
-    const [imgSrc, setImgSrc] = useState(primary || fallback || null);
+    const [imgIndex, setImgIndex] = useState(0);
+    const currentSrc = urlChain[imgIndex] || null;
+
     useEffect(() => {
-      setImgSrc(primary || fallback || null);
+      setImgIndex(0); // URL 바뀌면 항상 1순위부터 재시도
     }, [primary, fallback]);
 
     const handleImgError = () => {
-      if (imgSrc && imgSrc !== fallback && fallback) {
-        setImgSrc(fallback);
-      } else {
-        setImgSrc(null);
-      }
+      setImgIndex((i) => (i + 1 < urlChain.length ? i + 1 : i));
     };
 
     return (
@@ -298,12 +300,12 @@ export default function Card({ initialCandidates = [] }) {
           ))}
         </div>
 
-        {/* ✅ 원형 아바타: .img-wrap / .img-frame 사용 (CSS와 매칭) */}
+        {/* ✅ 원형 아바타 (.img-wrap / .img-frame) */}
         <div className="img-wrap">
-          {imgSrc ? (
+          {currentSrc ? (
             <img
               className="img-frame"
-              src={imgSrc}
+              src={currentSrc}
               alt={name}
               draggable={false}
               loading="eager"
@@ -345,7 +347,7 @@ export default function Card({ initialCandidates = [] }) {
     if (uid != null) setSelectedUserId(uid);
   };
 
-  // ✅ translate3d로 레이어 고정 (CSS의 .slot 기본과 일치)
+  // ✅ translate3d 유틸
   const t3d = (px) => `translate3d(calc(-50% + ${px}px), -50%, 0)`;
 
   return (
