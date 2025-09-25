@@ -62,7 +62,6 @@ export default function Card({ initialCandidates = [] }) {
   const [dir, setDir] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ 잔상 줄이기용: 드래그 상태 클래스토글
   const [isDragging, setIsDragging] = useState(false);
   const dragging = useRef(false);
   const movedRef = useRef(false);
@@ -229,53 +228,16 @@ export default function Card({ initialCandidates = [] }) {
     });
   };
 
-  const breakAtHalf = (text) => {
-    const raw = (text ?? "").trim();
-    const arr = Array.from(raw);
-    const n = arr.length;
-    if (n < 2) return raw;
-    const mid = Math.floor(n / 2);
-    const isBreak = (ch) => /\s|[.,!?;:·・\-—]/.test(ch);
-    let idx = mid;
-    for (let d = 0; d <= Math.min(8, n - 1); d++) {
-      if (mid - d > 0 && isBreak(arr[mid - d])) {
-        idx = mid - d + 1;
-        break;
-      }
-      if (mid + d < n - 1 && isBreak(arr[mid + d])) {
-        idx = mid + d + 1;
-        break;
-      }
-    }
-    return arr.slice(0, idx).join("") + "\n" + arr.slice(idx).join("");
-  };
-
-  // ✅ 이미지 우선순위: 1) profileImageUrl → 2) typeImageUrl2 (에러 시 폴백)
+  // ✅ introduce는 자연스럽게 그대로 표시
   const CardBody = ({ item = {} }) => {
     const {
       name = "이름 없음",
       department = "학과 없음",
       introduce = "소개 없음",
-      profileImageUrl,
-      typeImageUrl2, // ← 여기!
+      typeImageUrl2,
     } = item;
 
-    const msgText = breakAtHalf(introduce ?? "");
-
-    const primary = (profileImageUrl ?? "").trim() || null;
-    const fallback = (typeImageUrl2 ?? "").trim() || null; // ← 여기!
-    const urlChain = [primary, fallback].filter(Boolean);
-
-    const [imgIndex, setImgIndex] = useState(0);
-    const currentSrc = urlChain[imgIndex] || null;
-
-    useEffect(() => {
-      setImgIndex(0); // URL 바뀌면 항상 1순위부터 재시도
-    }, [primary, fallback]);
-
-    const handleImgError = () => {
-      setImgIndex((i) => (i + 1 < urlChain.length ? i + 1 : i));
-    };
+    const currentSrc = (typeImageUrl2 ?? "").trim() || null;
 
     return (
       <>
@@ -300,7 +262,6 @@ export default function Card({ initialCandidates = [] }) {
           ))}
         </div>
 
-        {/* ✅ 원형 아바타 (.img-wrap / .img-frame) */}
         <div className="img-wrap">
           {currentSrc ? (
             <img
@@ -310,7 +271,6 @@ export default function Card({ initialCandidates = [] }) {
               draggable={false}
               loading="eager"
               decoding="async"
-              onError={handleImgError}
             />
           ) : (
             <div className="img-frame" aria-hidden="true" />
@@ -321,7 +281,7 @@ export default function Card({ initialCandidates = [] }) {
           <div className="arch-content">
             <p className="name">{name}</p>
             <p className="major">{department}</p>
-            <p className="msg">“{msgText}”</p>
+            <p className="msg">{introduce ?? "소개 없음"}</p>
           </div>
         </div>
       </>
@@ -347,7 +307,6 @@ export default function Card({ initialCandidates = [] }) {
     if (uid != null) setSelectedUserId(uid);
   };
 
-  // ✅ translate3d 유틸
   const t3d = (px) => `translate3d(calc(-50% + ${px}px), -50%, 0)`;
 
   return (
@@ -360,10 +319,7 @@ export default function Card({ initialCandidates = [] }) {
         <div
           className={`card-wrap ${snapping ? "snapping" : ""} ${dir} ${isDragging ? "dragging" : ""}`}
           onTouchStartCapture={(e) => swipeEnabled && onStart(e.touches[0].clientX)}
-          onTouchMoveCapture={(e) => {
-            if (!swipeEnabled) return;
-            onMove(e.touches[0].clientX);
-          }}
+          onTouchMoveCapture={(e) => swipeEnabled && onMove(e.touches[0].clientX)}
           onTouchEndCapture={swipeEnabled ? onEnd : undefined}
           onMouseDownCapture={(e) => swipeEnabled && onStart(e.clientX)}
           onMouseMoveCapture={(e) => swipeEnabled && onMove(e.clientX)}
