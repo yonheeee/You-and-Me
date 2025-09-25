@@ -87,7 +87,7 @@ function TutorEnd() {
                   <div className="tuend-profile-name">'너랑나랑' 앱 튜토리얼을 마치겠습니다.</div>
                   <p className="tuend-question">튜토리얼에서 안내해 드린 내용을 바탕으로,<br/> '너랑나랑'에서 새로운 인연을 탐색하고 성공적인 만남을 이루시기를 바랍니다.</p>
                   <div className="tuend-actions">
-                    <button className="tuend-btn tuend-btn-ghost" onClick={handleGoLogin}>로그인 하러가기</button>
+                    <button className="tuend-btn tuend-btn-ghost" onClick={handleGoLogin}>시작하기</button>
                   </div>
                 </div>
               </div>

@@ -202,13 +202,13 @@ export default function LoginOrGate() {
           </button>
 
           {/* ✅ 튜토리얼로 이동 버튼 */}
-          <button
+          {/* <button
             type="button"
             className="tutorial-btn"
             onClick={() => navigate("/tutorial/start")}
           >
             튜토리얼 시작하기
-          </button>
+          </button> */}
         </div>
         {/* Q&A 버튼 */}
       </section>
