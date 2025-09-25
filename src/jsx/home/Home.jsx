@@ -36,25 +36,25 @@ function Home() {
     {
       role: "PM",
       major: "항공소프트웨어공학과",
-      person: "항소 공주님 21 김연희",
+      person: "21학번 김연희",
       ig: "https://instagram.com/yonhee0706",
     },
     {
       role: "디자인",
       major: "시각디자인학과",
-      person: "시디 카리나 23 문지원",
+      person: "23학번 문지원",
       ig: "https://instagram.com/1m0zi",
     },
     {
       role: "프론트엔드",
       major: "항공소프트웨어공학과",
-      person: "항소 남주혁 22 김형석",
+      person: "22학번 김형석",
       ig: "https://instagram.com/bro_stone_03",
     },
     {
       role: "백엔드",
       major: "항공소프트웨어공학과",
-      person: "항소 최우식 22 박찬우",
+      person: "22학번 박찬우",
       ig: "https://instagram.com/chanwoo0321",
     },
   ];
