@@ -170,7 +170,7 @@
 /* === 원형 아바타(완벽 원형, 가장자리 깨짐 방지) === */
 .img-wrap {
   /* 10px = 1rem 기준 */
-  --size: 12rem; /* 120px */
+  --size: 8rem; /* 120px */
   position: relative;
   width: var(--size);
   height: var(--size);
