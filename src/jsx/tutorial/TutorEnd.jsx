@@ -24,7 +24,7 @@ function TutorEnd() {
   const navigate = useNavigate();
 
   const handleGoLogin = () => {
-    navigate("/login");
+    navigate("/");
   };
 
   return (
