@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import "../../css/home/DrinkMenu.css";
 
 // 이미지 import (실제 경로 맞게 수정!)
-import lovePotionImg from "../../image/home/러브포션.png";
-import americanoImg from "../../image/home/블랙하트.png";
+import lovePotionImg from "../../image/home/러브포션.png";
+import americanoImg from "../../image/home/블랙하트.png";
 import icedTeaImg from "../../image/home/피치못할사정.png";
 
 export default function DrinkMenu() {
