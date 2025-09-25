@@ -56,7 +56,7 @@ export default function ResultPage({ hideHomeButton = false, user: propUser }) {
       {!hideHomeButton && (
         <button
           className="home-btn"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/tutorial/start")}
           type="button"
         >
           홈화면 가기 ➔
