@@ -166,17 +166,31 @@
     drop-shadow(0 2px 3px rgba(1, 1, 1, 0.5));
 }
 
-/* ===== 이미지/텍스트 ===== */
+/* === 원형 아바타 공통 === */
 .img-wrap {
-  background: transparent;
-  box-shadow: none;
+  /* 크기 원하는 대로 조절 (10px = 1rem 기준) */
+  --size: 12rem; /* 120px */
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  margin: 0 auto;
+  border-radius: 50%;
+  overflow: hidden;             /* 원 밖으로 잘라내기 */
+  background: #f2f3f5;          /* 빈 상태 배경 */
+  box-shadow: 0 0 0 0.15rem rgba(0,0,0,.05) inset;
+  /* 반응형으로 쓰고 싶으면 아래 두 줄로 대체
+     width: min(48vw, 14rem);
+     aspect-ratio: 1 / 1;
+  */
 }
+
+/* 실제 이미지가 원을 꽉 채우도록 */
 .img-frame {
-  width: 8rem;
-  height: 8rem;
-  pointer-events: none; /* 이미지도 부모로 터치 전달 */
-  -webkit-user-drag: none;
-  user-select: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;            /* 비율 유지하며 빈틈 없이 채우기 */
+  object-position: center;
+  display: block;
 }
 
 .info h3 {
