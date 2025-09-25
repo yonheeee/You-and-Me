@@ -48,6 +48,7 @@ function Layout({ children }) {
     "/qpage",
     "/tutorial/result",
     "/tutorial/7",
+    "/tutorial/start",
     "/tutorial/end",
   ];
   const shouldHide =
