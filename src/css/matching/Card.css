@@ -182,7 +182,7 @@
   clip-path: circle(50%); /* 사파리/안드 계열 보강 */
   -webkit-mask-image: -webkit-radial-gradient(white, black);
 
-  background: #f2f3f5;
+  background: #FFE8C5;
   /* 부드러운 테두리 */
   box-shadow: 0 0 0 0.15rem rgba(0,0,0,.05) inset;
 

@@ -98,7 +98,7 @@ export default function Card({ initialCandidates = [] }) {
   const onStart = (x) => {
     if (!swipeEnabled) return;
     dragging.current = true;
-    setIsDragging(true);              // ✅ .dragging 클래스 켜기
+    setIsDragging(true); // ✅ .dragging 클래스 켜기
     movedRef.current = false;
     setSnapping(false);
     setDir("");
@@ -117,7 +117,7 @@ export default function Card({ initialCandidates = [] }) {
   const onEnd = () => {
     if (!dragging.current || !swipeEnabled) return;
     dragging.current = false;
-    setIsDragging(false);             // ✅ .dragging 클래스 끄기
+    setIsDragging(false); // ✅ .dragging 클래스 끄기
 
     const absDx = Math.abs(dx);
     const sign = dx < 0 ? -1 : 1;
@@ -277,7 +277,11 @@ export default function Card({ initialCandidates = [] }) {
 
     return (
       <>
-        <div className="card-stars" aria-hidden="true" style={{ pointerEvents: "none" }}>
+        <div
+          className="card-stars"
+          aria-hidden="true"
+          style={{ pointerEvents: "none" }}
+        >
           {FIXED_STARS.map((s) => (
             <img
               key={s.id}
@@ -356,8 +360,12 @@ export default function Card({ initialCandidates = [] }) {
 
       <div className="card-root">
         <div
-          className={`card-wrap ${snapping ? "snapping" : ""} ${dir} ${isDragging ? "dragging" : ""}`}
-          onTouchStartCapture={(e) => swipeEnabled && onStart(e.touches[0].clientX)}
+          className={`card-wrap ${snapping ? "snapping" : ""} ${dir} ${
+            isDragging ? "dragging" : ""
+          }`}
+          onTouchStartCapture={(e) =>
+            swipeEnabled && onStart(e.touches[0].clientX)
+          }
           onTouchMoveCapture={(e) => {
             if (!swipeEnabled) return;
             onMove(e.touches[0].clientX);
@@ -375,7 +383,10 @@ export default function Card({ initialCandidates = [] }) {
               className="slot slot-center"
               style={{ transform: t3d(xCenter) }}
             >
-              <div className="card" onClick={handleCardClick(candidates[center])}>
+              <div
+                className="card"
+                onClick={handleCardClick(candidates[center])}
+              >
                 <CardBody item={candidates[center]} />
               </div>
             </div>
@@ -389,7 +400,10 @@ export default function Card({ initialCandidates = [] }) {
                 className="slot slot-left"
                 style={{ transform: t3d(xTwoLeft), zIndex: 2 }}
               >
-                <div className="card" onClick={handleCardClick(candidates[center])}>
+                <div
+                  className="card"
+                  onClick={handleCardClick(candidates[center])}
+                >
                   <CardBody item={candidates[center]} />
                 </div>
               </div>
@@ -398,7 +412,10 @@ export default function Card({ initialCandidates = [] }) {
                 className="slot slot-right"
                 style={{ transform: t3d(xTwoRight), zIndex: 1 }}
               >
-                <div className="card" onClick={handleCardClick(candidates[otherIdx])}>
+                <div
+                  className="card"
+                  onClick={handleCardClick(candidates[otherIdx])}
+                >
                   <CardBody item={candidates[otherIdx]} />
                 </div>
               </div>
@@ -413,7 +430,10 @@ export default function Card({ initialCandidates = [] }) {
                 className="slot slot-far-left"
                 style={{ transform: t3d(xFarLeft) }}
               >
-                <div className="card" onClick={handleCardClick(candidates[idxFarLeft])}>
+                <div
+                  className="card"
+                  onClick={handleCardClick(candidates[idxFarLeft])}
+                >
                   <CardBody item={candidates[idxFarLeft]} />
                 </div>
               </div>
@@ -422,7 +442,10 @@ export default function Card({ initialCandidates = [] }) {
                 className="slot slot-left"
                 style={{ transform: t3d(xLeft) }}
               >
-                <div className="card" onClick={handleCardClick(candidates[idxLeft])}>
+                <div
+                  className="card"
+                  onClick={handleCardClick(candidates[idxLeft])}
+                >
                   <CardBody item={candidates[idxLeft]} />
                 </div>
               </div>
@@ -431,7 +454,10 @@ export default function Card({ initialCandidates = [] }) {
                 className="slot slot-center"
                 style={{ transform: t3d(xCenter) }}
               >
-                <div className="card" onClick={handleCardClick(candidates[center])}>
+                <div
+                  className="card"
+                  onClick={handleCardClick(candidates[center])}
+                >
                   <CardBody item={candidates[center]} />
                 </div>
               </div>
@@ -440,7 +466,10 @@ export default function Card({ initialCandidates = [] }) {
                 className="slot slot-right"
                 style={{ transform: t3d(xRight) }}
               >
-                <div className="card" onClick={handleCardClick(candidates[idxRight])}>
+                <div
+                  className="card"
+                  onClick={handleCardClick(candidates[idxRight])}
+                >
                   <CardBody item={candidates[idxRight]} />
                 </div>
               </div>
@@ -449,7 +478,10 @@ export default function Card({ initialCandidates = [] }) {
                 className="slot slot-far-right"
                 style={{ transform: t3d(xFarRight) }}
               >
-                <div className="card" onClick={handleCardClick(candidates[idxFarRight])}>
+                <div
+                  className="card"
+                  onClick={handleCardClick(candidates[idxFarRight])}
+                >
                   <CardBody item={candidates[idxFarRight]} />
                 </div>
               </div>
@@ -458,7 +490,12 @@ export default function Card({ initialCandidates = [] }) {
         </div>
 
         <div className="cta-wrap">
-          <button type="button" className="cta-btn" onClick={openRematchConfirm} disabled={loading}>
+          <button
+            type="button"
+            className="cta-btn"
+            onClick={openRematchConfirm}
+            disabled={loading}
+          >
             {loading ? "매칭 시작 중..." : "다시 매칭하기"}
           </button>
         </div>
@@ -466,7 +503,10 @@ export default function Card({ initialCandidates = [] }) {
 
       {selectedUserId != null &&
         createPortal(
-          <div className="modal-overlay" onClick={() => setSelectedUserId(null)}>
+          <div
+            className="modal-overlay"
+            onClick={() => setSelectedUserId(null)}
+          >
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <YouProfile
                 userId={selectedUserId}
