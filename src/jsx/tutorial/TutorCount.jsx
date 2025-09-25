@@ -38,7 +38,7 @@ function TutorCount() {
   // ✅ 단계별 상단 위치와 가로 정렬만 지정 (좌/우 여백은 CSS에서 공통으로 관리)
   const TUTORIAL_PLACEMENTS = [
     { top: "10%", justify: "center" },   // step 1: 가운데
-    { top: "33%", justify: "center" },   // step 2: 가운데
+    { top: "24%", justify: "center" },   // step 2: 가운데
   ];
 
   const [stepIdx, setStepIdx] = useState(0);
@@ -139,7 +139,7 @@ function TutorCount() {
 
             <ul className="tucount-sheet-bullets">
               <li>
-                더 많은 만남을 원하신다면, 축제날 <b>‘멋쟁이 사자처럼’</b> 부스를
+                더 많은 만남을 원하신다면, 축제날 <b>‘멋쟁이사자처럼’</b> 부스를
                 방문해 음료와 함께 <b>특별한 쿠폰</b>을 받아보세요.
               </li>
               <li>매칭과 플러팅 기회를 더할 번쩍 더 드립니다.</li>
