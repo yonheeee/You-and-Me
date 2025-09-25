@@ -60,6 +60,9 @@ export default function Card({ initialCandidates = [] }) {
   const [snapping, setSnapping] = useState(false);
   const [dir, setDir] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // ✅ 잔상 제거용: 드래그 중 class 토글하려면 state 필요
+  const [isDragging, setIsDragging] = useState(false);
   const dragging = useRef(false);
   const movedRef = useRef(false);
   const lastX = useRef(0);
@@ -87,7 +90,7 @@ export default function Card({ initialCandidates = [] }) {
   const swipeEnabled = hasThreePlus;
 
   const TWO_MULT = 0.5;
-  const xTwoLeft = -SPREAD * TWO_MULT + dx;   // ✅ 오타 수정
+  const xTwoLeft = -SPREAD * TWO_MULT + dx;
   const xTwoRight = SPREAD * TWO_MULT + dx;
   const otherIdx = wrap(center + 1, N);
 
@@ -95,6 +98,7 @@ export default function Card({ initialCandidates = [] }) {
   const onStart = (x) => {
     if (!swipeEnabled) return;
     dragging.current = true;
+    setIsDragging(true);              // ✅ .dragging 클래스 켜기
     movedRef.current = false;
     setSnapping(false);
     setDir("");
@@ -113,6 +117,8 @@ export default function Card({ initialCandidates = [] }) {
   const onEnd = () => {
     if (!dragging.current || !swipeEnabled) return;
     dragging.current = false;
+    setIsDragging(false);             // ✅ .dragging 클래스 끄기
+
     const absDx = Math.abs(dx);
     const sign = dx < 0 ? -1 : 1;
     if (absDx >= MAX_DRAG / 2) completeSlide(sign);
@@ -278,6 +284,8 @@ export default function Card({ initialCandidates = [] }) {
               src={starImg}
               alt=""
               className="star"
+              draggable={false}
+              decoding="async"
               style={{
                 left: `${s.left}%`,
                 top: `${s.top}%`,
@@ -289,9 +297,12 @@ export default function Card({ initialCandidates = [] }) {
             />
           ))}
         </div>
-        <div className="img-frame">
+
+        {/* ✅ 원형 아바타: .img-wrap / .img-frame 사용 (CSS와 매칭) */}
+        <div className="img-wrap">
           {imgSrc ? (
             <img
+              className="img-frame"
               src={imgSrc}
               alt={name}
               draggable={false}
@@ -300,9 +311,10 @@ export default function Card({ initialCandidates = [] }) {
               onError={handleImgError}
             />
           ) : (
-            <div className="img-placeholder" aria-hidden="true" />
+            <div className="img-frame" aria-hidden="true" />
           )}
         </div>
+
         <div className="arch">
           <div className="arch-content">
             <p className="name">{name}</p>
@@ -314,9 +326,10 @@ export default function Card({ initialCandidates = [] }) {
     );
   };
 
+  // 위치 계산
   const xFarLeft = -2 * SPREAD + dx;
   const xLeft = -1 * SPREAD + dx;
-  const xCenter = 0 * SPREAD + dx;
+  const xCenter = dx;
   const xRight = 1 * SPREAD + dx;
   const xFarRight = 2 * SPREAD + dx;
 
@@ -332,6 +345,9 @@ export default function Card({ initialCandidates = [] }) {
     if (uid != null) setSelectedUserId(uid);
   };
 
+  // ✅ translate3d로 레이어 고정 (CSS의 .slot 기본과 일치)
+  const t3d = (px) => `translate3d(calc(-50% + ${px}px), -50%, 0)`;
+
   return (
     <>
       <div className="title">
@@ -340,12 +356,11 @@ export default function Card({ initialCandidates = [] }) {
 
       <div className="card-root">
         <div
-          className={`card-wrap ${snapping ? "snapping" : ""} ${dir}`}
+          className={`card-wrap ${snapping ? "snapping" : ""} ${dir} ${isDragging ? "dragging" : ""}`}
           onTouchStartCapture={(e) => swipeEnabled && onStart(e.touches[0].clientX)}
           onTouchMoveCapture={(e) => {
             if (!swipeEnabled) return;
             onMove(e.touches[0].clientX);
-            // React 19 passive touchmove → preventDefault 금지
           }}
           onTouchEndCapture={swipeEnabled ? onEnd : undefined}
           onMouseDownCapture={(e) => swipeEnabled && onStart(e.clientX)}
@@ -358,7 +373,7 @@ export default function Card({ initialCandidates = [] }) {
             <div
               key={getUid(candidates[center])}
               className="slot slot-center"
-              style={{ transform: `translate(calc(-50% + ${xCenter}px), -50%)` }}
+              style={{ transform: t3d(xCenter) }}
             >
               <div className="card" onClick={handleCardClick(candidates[center])}>
                 <CardBody item={candidates[center]} />
@@ -372,10 +387,7 @@ export default function Card({ initialCandidates = [] }) {
               <div
                 key={getUid(candidates[center])}
                 className="slot slot-left"
-                style={{
-                  transform: `translate(calc(-50% + ${xTwoLeft}px), -50%)`,
-                  zIndex: 2,
-                }}
+                style={{ transform: t3d(xTwoLeft), zIndex: 2 }}
               >
                 <div className="card" onClick={handleCardClick(candidates[center])}>
                   <CardBody item={candidates[center]} />
@@ -384,10 +396,7 @@ export default function Card({ initialCandidates = [] }) {
               <div
                 key={getUid(candidates[otherIdx])}
                 className="slot slot-right"
-                style={{
-                  transform: `translate(calc(-50% + ${xTwoRight}px), -50%)`,
-                  zIndex: 1,
-                }}
+                style={{ transform: t3d(xTwoRight), zIndex: 1 }}
               >
                 <div className="card" onClick={handleCardClick(candidates[otherIdx])}>
                   <CardBody item={candidates[otherIdx]} />
@@ -402,7 +411,7 @@ export default function Card({ initialCandidates = [] }) {
               <div
                 key={getUid(candidates[idxFarLeft])}
                 className="slot slot-far-left"
-                style={{ transform: `translate(calc(-50% + ${xFarLeft}px), -50%)` }}
+                style={{ transform: t3d(xFarLeft) }}
               >
                 <div className="card" onClick={handleCardClick(candidates[idxFarLeft])}>
                   <CardBody item={candidates[idxFarLeft]} />
@@ -411,7 +420,7 @@ export default function Card({ initialCandidates = [] }) {
               <div
                 key={getUid(candidates[idxLeft])}
                 className="slot slot-left"
-                style={{ transform: `translate(calc(-50% + ${xLeft}px), -50%)` }}
+                style={{ transform: t3d(xLeft) }}
               >
                 <div className="card" onClick={handleCardClick(candidates[idxLeft])}>
                   <CardBody item={candidates[idxLeft]} />
@@ -420,7 +429,7 @@ export default function Card({ initialCandidates = [] }) {
               <div
                 key={getUid(candidates[center])}
                 className="slot slot-center"
-                style={{ transform: `translate(calc(-50% + ${xCenter}px), -50%)` }}
+                style={{ transform: t3d(xCenter) }}
               >
                 <div className="card" onClick={handleCardClick(candidates[center])}>
                   <CardBody item={candidates[center]} />
@@ -429,7 +438,7 @@ export default function Card({ initialCandidates = [] }) {
               <div
                 key={getUid(candidates[idxRight])}
                 className="slot slot-right"
-                style={{ transform: `translate(calc(-50% + ${xRight}px), -50%)` }}
+                style={{ transform: t3d(xRight) }}
               >
                 <div className="card" onClick={handleCardClick(candidates[idxRight])}>
                   <CardBody item={candidates[idxRight]} />
@@ -438,7 +447,7 @@ export default function Card({ initialCandidates = [] }) {
               <div
                 key={getUid(candidates[idxFarRight])}
                 className="slot slot-far-right"
-                style={{ transform: `translate(calc(-50% + ${xFarRight}px), -50%)` }}
+                style={{ transform: t3d(xFarRight) }}
               >
                 <div className="card" onClick={handleCardClick(candidates[idxFarRight])}>
                   <CardBody item={candidates[idxFarRight]} />
