@@ -40,19 +40,19 @@ function Home() {
       ig: "https://instagram.com/yonhee0706",
     },
     {
-      role: "디자인",
+      role: "DE",
       major: "시각디자인학과",
       person: "23학번 문지원",
       ig: "https://instagram.com/1m0zi",
     },
     {
-      role: "프론트엔드",
+      role: "FE",
       major: "항공소프트웨어공학과",
       person: "22학번 김형석",
       ig: "https://instagram.com/bro_stone_03",
     },
     {
-      role: "백엔드",
+      role: "BE",
       major: "항공소프트웨어공학과",
       person: "22학번 박찬우",
       ig: "https://instagram.com/chanwoo0321",
