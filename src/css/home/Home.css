@@ -240,7 +240,6 @@
   align-items: center;
   justify-content: space-between; /* 좌: 로고+TEAM / 우: 아이콘 */
   margin: 0 0 1.2rem 0;
-  padding-right: 0.2rem; /* ✅ 오른쪽 보정 → 멤버 아이콘과 같은 라인 */
 }
 
 .credits-title-left {
@@ -268,7 +267,7 @@
 
 .credits-item {
   display: flex;
-  align-items: center;   /* ✅ 세로 중앙정렬 */
+  align-items: flex-start;
   gap: 0.3rem;
   padding: 1rem 1.2rem;
   border-radius: 1.2rem;
@@ -290,7 +289,6 @@
   flex-direction: column;
   gap: 0.3rem;
   flex: 1;
-  justify-content: center; /* ✅ 중앙 정렬 */
 }
 
 .credit-value {
@@ -318,17 +316,16 @@
 
 /* 우측 인스타 아이콘 버튼 (공식 + 개인 공통) */
 .credits-ig {
-  flex-shrink: 0;
   margin-left: auto;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.8rem;
-  height: 1.8rem;
+  width: 1.6rem;
+  height: 1.6rem;
   border-radius: 9999px;
   border: 0.1rem solid #ffd7e7;
   background: #ffffff;
-  color: #ff5a91;
+  color: #ff5a91; /* svg는 currentColor */
   transition: filter 120ms ease, background 120ms ease, transform 80ms ease;
 }
 .credits-ig:active {
