@@ -7,7 +7,8 @@
   align-items: center;
   justify-content: flex-start;
   background: #fff2fc;
-  overflow: hidden;
+  overflow-x: hidden;   /* ✅ 가로만 숨기고 */
+  overflow-y: visible;  /* ✅ 세로 스크롤 허용 */
 }
 
 .hero-bg {
@@ -238,8 +239,9 @@
 .credits-title {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 좌: 로고+TEAM / 우: 아이콘 */
+  justify-content: space-between;
   margin: 0 0 1.2rem 0;
+  padding-right: 0.2rem; /* ✅ 아이콘 위치 보정 */
 }
 
 .credits-title-left {
@@ -267,7 +269,7 @@
 
 .credits-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;   /* ✅ 세로 중앙 정렬 */
   gap: 0.3rem;
   padding: 1rem 1.2rem;
   border-radius: 1.2rem;
@@ -276,19 +278,20 @@
 
 /* 라벨 */
 .credits-label {
-  flex: 0 0 3.2rem; /* 라벨 고정폭 */
+  flex: 0 0 3.2rem;
   font-size: 0.8rem;
   font-weight: 800;
   color: #ff5a91;
   white-space: nowrap;
 }
 
-/* dd 묶음 (세로로) */
+/* dd 묶음 */
 .credits-info {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
   flex: 1;
+  justify-content: center;
 }
 
 .credit-value {
@@ -314,18 +317,19 @@
   box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.08);
 }
 
-/* 우측 인스타 아이콘 버튼 (공식 + 개인 공통) */
+/* 우측 인스타 아이콘 버튼 */
 .credits-ig {
+  flex-shrink: 0;
   margin-left: auto;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 1.8rem;
+  height: 1.8rem;
   border-radius: 9999px;
   border: 0.1rem solid #ffd7e7;
   background: #ffffff;
-  color: #ff5a91; /* svg는 currentColor */
+  color: #ff5a91;
   transition: filter 120ms ease, background 120ms ease, transform 80ms ease;
 }
 .credits-ig:active {
@@ -339,4 +343,24 @@
 .ig-icon {
   width: 1.6rem;
   height: 1.6rem;
+}
+
+/* ✅ 380px 이하 화면 대응 */
+@media (max-width: 380px) {
+  .booth-map {
+    height: 180px;
+  }
+
+  .booth-map-info {
+    height: 150px;
+  }
+
+  .hero-subtitle {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .credits-item {
+    padding: 0.8rem 1rem;
+  }
 }
