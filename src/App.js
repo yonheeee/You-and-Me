@@ -13,6 +13,8 @@ import useRealtimeNotifications from "./hooks/useRealtimeNotifications.js";
 import useNotifyStore from "./api/notifyStore";
 import AppWsBridge from "./AppWsBridge.jsx";
 
+import "./App.css";
+
 export default function App() {
   const { isInitialized, setInitialized } = useUserStore();
   const [authReady, setAuthReady] = useState(false);
