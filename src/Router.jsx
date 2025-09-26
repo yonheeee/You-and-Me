@@ -168,6 +168,13 @@ function AppRouter() {
           <Route path="/tutorial/6" element={<TutorPopup />} />
           <Route path="/tutorial/7" element={<TutorCount />} />
           <Route path="/tutorial/end" element={<TutorEnd />} />
+
+           <Route
+            path="/infoform/test"
+            element={
+                <InfoForm />
+            }
+          />
         </Routes>
       </Layout>
     </BrowserRouter>
