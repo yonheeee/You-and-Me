@@ -1,3 +1,11 @@
+/* 전역 스크롤 허용 */
+html, body {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 /* Hero Section */
 .hero {
   position: relative;
@@ -7,8 +15,7 @@
   align-items: center;
   justify-content: flex-start;
   background: #fff2fc;
-  overflow-x: hidden;   /* ✅ 가로만 숨기고 */
-  overflow-y: visible;  /* ✅ 세로 스크롤 허용 */
+  /* ✅ overflow 제거 */
 }
 
 .hero-bg {
@@ -116,7 +123,7 @@
 
 .booth-location {
   width: 100%;
-  clear: both; /* ✅ float 옆으로 흐르지 않게 */
+  clear: both;
   background: #fff;
   border-radius: 1rem;
   padding: 1rem 2rem 2rem 2rem;
@@ -241,7 +248,7 @@
   align-items: center;
   justify-content: space-between;
   margin: 0 0 1.2rem 0;
-  padding-right: 0.2rem; /* ✅ 아이콘 위치 보정 */
+  padding-right: 0.2rem;
 }
 
 .credits-title-left {
@@ -269,14 +276,13 @@
 
 .credits-item {
   display: flex;
-  align-items: center;   /* ✅ 세로 중앙 정렬 */
+  align-items: center;
   gap: 0.3rem;
   padding: 1rem 1.2rem;
   border-radius: 1.2rem;
   background: rgba(255, 90, 145, 0.05);
 }
 
-/* 라벨 */
 .credits-label {
   flex: 0 0 3.2rem;
   font-size: 0.8rem;
@@ -285,7 +291,6 @@
   white-space: nowrap;
 }
 
-/* dd 묶음 */
 .credits-info {
   display: flex;
   flex-direction: column;
@@ -306,7 +311,6 @@
   color: #374151;
 }
 
-/* 로고 아이콘 */
 .credits-logo {
   width: 2.4rem;
   height: 2.4rem;
@@ -317,7 +321,7 @@
   box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.08);
 }
 
-/* 우측 인스타 아이콘 버튼 */
+/* 인스타 아이콘 */
 .credits-ig {
   flex-shrink: 0;
   margin-left: auto;
@@ -345,7 +349,7 @@
   height: 1.6rem;
 }
 
-/* ✅ 380px 이하 화면 대응 */
+/* 380px 이하 대응 */
 @media (max-width: 380px) {
   .booth-map {
     height: 180px;
