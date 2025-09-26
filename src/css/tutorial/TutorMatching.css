@@ -264,13 +264,6 @@
     padding-top: 2.5rem;
     margin-bottom: -8rem;
   }
-
-  /* 페이지 전체 스크롤 방지 */
-  html, body {
-    height: 100svh;
-    overflow: hidden;             /* 세로 스크롤 막기 */
-    overscroll-behavior: none;    /* iOS/안드로 밴드 방지 */
-  }
   
   .tur-matching-hint{
     transform: translate(-50%, 20%);
