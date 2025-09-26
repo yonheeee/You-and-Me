@@ -102,7 +102,7 @@ function Home() {
 
             <FlirtingTabs />
 
-            {/* 음료 메뉴 + 부스 위치 (항상 세로로, 지도는 아래) */}
+            {/* 음료 메뉴 + 부스 위치 */}
             <section className="drink-and-map">
               <div className="drink-menu-block">
                 <DrinkMenu />
@@ -125,28 +125,39 @@ function Home() {
             <section className="credits-section">
               <div className="credits-card">
                 <h3 className="credits-title">
-                  <img
-                    src={`${process.env.PUBLIC_URL}/멋사로고.png`}
-                    alt="멋사 로고"
-                    className="credits-logo"
-                  />
-                  멋쟁이사자처럼
-                  <span className="credits-badge">TEAM</span>
+                  <div className="credits-title-left">
+                    <img
+                      src={`${process.env.PUBLIC_URL}/멋사로고.png`}
+                      alt="멋사 로고"
+                      className="credits-logo"
+                    />
+                    멋쟁이사자처럼
+                    <span className="credits-badge">TEAM</span>
+                  </div>
+
+                  {/* ✅ 오른쪽 인스타 아이콘 (공식 계정) */}
+                  <a
+                    href="https://instagram.com/likelion_hsu"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="credits-ig"
+                    aria-label="멋쟁이사자처럼 인스타그램 열기"
+                    title="Instagram"
+                  >
+                    <InstaIcon className="ig-icon" />
+                  </a>
                 </h3>
 
                 <dl className="credits-list">
                   {TEAM.map((m) => (
                     <div className="credits-item" key={m.role}>
-                      {/* 라벨 */}
                       <dt className="credits-label">{m.role}</dt>
-
-                      {/* dd 묶음 (세로) */}
                       <div className="credits-info">
                         <dd className="credit-value">{m.major}</dd>
                         <dd className="credits-value">{m.person}</dd>
                       </div>
 
-                      {/* 우측 인스타 아이콘 */}
+                      {/* 개인 인스타 아이콘 */}
                       {m.ig && (
                         <a
                           className="credits-ig"

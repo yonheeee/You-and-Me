@@ -234,13 +234,20 @@
   box-shadow: 0 0.8rem 2.4rem rgba(0, 0, 0, 0.06);
 }
 
+/* 제목 줄: 좌측 그룹 + 우측 인스타 */
 .credits-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 좌: 로고+TEAM / 우: 아이콘 */
+  margin: 0 0 1.2rem 0;
+}
+
+.credits-title-left {
   display: flex;
   align-items: center;
   gap: 0.8rem;
   font-size: 1rem;
   font-weight: 800;
-  margin: 0 0 1.2rem 0;
 }
 
 .credits-badge {
@@ -279,9 +286,9 @@
 /* dd 묶음 (세로로) */
 .credits-info {
   display: flex;
-  flex-direction: column; /* ✅ 세로 쌓기 */
+  flex-direction: column;
   gap: 0.3rem;
-  flex: 1;               /* 남은 공간 차지 */
+  flex: 1;
 }
 
 .credit-value {
@@ -307,7 +314,7 @@
   box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.08);
 }
 
-/* 우측 인스타 아이콘 버튼 */
+/* 우측 인스타 아이콘 버튼 (공식 + 개인 공통) */
 .credits-ig {
   margin-left: auto;
   display: inline-flex;
