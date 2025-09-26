@@ -21,22 +21,19 @@
   --sheet-height: 88vh;
 }
 
-/* 화면 컨테이너: 작은 화면에서도 스크롤 책임 */
+/* 화면 컨테이너 */
 .profile-root {
   min-height: 100dvh;
   background: var(--bg);
-  display: block;        /* 중앙정렬용 flex 제거 */
-  overflow-y: auto;      /* ✅ 페이지 스크롤 허용 */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
-/* 내부 셸: 가로 중앙 + 하단 여유 확보 */
 .form-shell {
   width: min(100%, var(--card-max));
-  margin-inline: auto;   /* ✅ 가운데 정렬 */
   padding: 6vh 1rem 2rem;
   box-sizing: border-box;
-  /* ✅ 하단 안전영역 + 버튼 공간만큼 여유 */
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 120px);
 }
 
 /* 타이틀 */
@@ -66,14 +63,13 @@
   flex-direction: column;
   gap: 1.1rem;
 }
-
-/* 과격한 당김 제거: 음수 마진/패딩 X */
 .field {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-top: 0;
-  margin-bottom: 1.2rem;
+  padding-top: -2rem;
+  margin-top: -2rem;
+  margin-bottom: 1.5rem;
 }
 
 .field-label {
@@ -312,9 +308,8 @@
   color: #b0b6bd;
 }
 
-/* 안내문: 과도한 상단 여백 축소 */
 .notice {
-  margin: 10vh 0 0;    /* ✅ 30vh → 10vh로 축소 */
+  margin: 30vh 0 0;
   padding-left: 1rem;
   color: #6f7680;
   font-family: var(--ui-font);
@@ -326,11 +321,11 @@
   list-style: disc;
 }
 
-/* 제출 버튼: 과도한 margin 제거 */
+/* 제출 버튼 */
 .primary-btn {
   width: 100%;
   height: 3.25rem;
-  margin-top: 1.25rem;  /* ✅ 20% → 1.25rem */
+  margin-top: 20%;
   border-radius: 2rem;
   border: 1.5px solid var(--btn-disabled-border);
   background: #fff;
@@ -567,17 +562,8 @@
     grid-column: 1 / -1;
   }
 
-  .form-shell {
-    padding-top: 4vh;  /* 상단 패딩 축소 */
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 140px);
-  }
-
-  .notice {
-    margin-top: 6vh;   /* 안내문 여백 추가 축소 */
-  }
-
   .primary-btn {
-    margin-top: 0.8rem; /* 버튼 밀림 방지 */
+    margin-top: 7vh;
   }
 }
 
