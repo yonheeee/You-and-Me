@@ -2,7 +2,7 @@ import "../../css/home/Home.css";
 import FlirtingTabs from "./FlirtingTabs";
 import Logo from "../../image/loginPage/logo2.png";
 import MatchingBanner from "../../image/home/match.svg";
-import Map from "../../image/home/map.png";        // ✅ 위치 지도
+import Map from "../../image/home/map.png"; // ✅ 위치 지도
 import MapInfo from "../../image/home/mapinfo.png"; // ✅ 번호 안내
 import QandA from "../../image/home/q&a.svg";
 
@@ -34,10 +34,16 @@ function Home() {
   // 팀 데이터
   const TEAM = [
     {
-      role: "PM",
+      role: "행사 총괄",
       major: "항공소프트웨어공학과",
       person: "21학번 김연희",
       ig: "https://instagram.com/yonhee0706",
+    },
+    {
+      role: "개발 PM",
+      major: "항공소프트웨어공학과",
+      person: "21학번 최지인",
+      ig: "https://instagram.com/choijiin_02",
     },
     {
       role: "DE",
@@ -68,12 +74,16 @@ function Home() {
               <div className="hero-bg"></div>
               <div className="hero-content">
                 <p className="hero-subtitle">
-                  평범한 축제가 <span className="highlight">특별</span>해지는 순간!{" "}
-                  <br />
-                  당신의 옆자리를 채울 <span className="highlight">한 사람</span>을
-                  찾아보세요.
+                  평범한 축제가 <span className="highlight">특별</span>해지는
+                  순간! <br />
+                  당신의 옆자리를 채울{" "}
+                  <span className="highlight">한 사람</span>을 찾아보세요.
                 </p>
-                <img src={Logo} alt="너랑 나랑 로고" className="hero-logo-img" />
+                <img
+                  src={Logo}
+                  alt="너랑 나랑 로고"
+                  className="hero-logo-img"
+                />
               </div>
             </section>
 
@@ -163,7 +173,10 @@ function Home() {
                 type="button"
               >
                 <div className="QandA-text">
-                  <div className="Q-title" style={{ fontSize: "20px", fontWeight: "bold" }}>
+                  <div
+                    className="Q-title"
+                    style={{ fontSize: "20px", fontWeight: "bold" }}
+                  >
                     FAQ
                   </div>
                   <div className="Q-subtitle" style={{ fontSize: "14px" }}>
