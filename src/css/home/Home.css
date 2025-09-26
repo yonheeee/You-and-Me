@@ -349,22 +349,415 @@ html, body {
   height: 1.6rem;
 }
 
-/* 380px 이하 대응 */
+/* 전역 스크롤 허용 */
+html, body {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: #fff2fc;
+  /* ✅ overflow 제거 */
+}
+
+.hero-bg {
+  position: absolute;
+  top: 80%;
+  left: 0;
+  width: 100%;
+  height: 90%;
+  background: #fff;
+  border-top-left-radius: 50% 15%;
+  border-top-right-radius: 50% 15%;
+  z-index: 0;
+}
+
+/* 콘텐츠 */
+.hero-content {
+  position: relative;
+  z-index: 1;
+  margin-top: 4rem;
+  text-align: center;
+  padding: 0 1.5rem;
+}
+
+/* 문구 */
+.hero-subtitle {
+  font-size: 1rem !important;
+  font-family: "Taenada";
+  font-weight: 700;
+  color: #434343;
+  line-height: 1.6;
+  margin-bottom: 3rem;
+}
+.hero-subtitle .highlight {
+  color: #e8048d;
+  font-weight: 900;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .hero-subtitle {
+    font-size: 1.3rem;
+  }
+  .hero-logo-text {
+    font-size: 3rem;
+  }
+}
+
+.hero-logo-img {
+  margin: 0 auto;
+  width: 90%;
+}
+
+/* 매칭 배너 */
+.home-matching-banner {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem auto;
+  max-width: 100%;
+}
+
+.matching-banner-img {
+  width: 90%;
+  border-radius: 1rem;
+  display: block;
+}
+
+.matching-banner-text {
+  position: absolute;
+  top: 50%;
+  left: 12%;
+  transform: translateY(-50%);
+  text-align: left;
+  color: #333;
+}
+
+.matching-banner-text h2 {
+  font-size: 1.7rem;
+  font-weight: bold;
+  margin-bottom: 3.5rem;
+}
+
+.matching-banner-text p {
+  font-size: 1rem;
+}
+
+/* ===== 음료 + 부스 위치: 항상 세로 배치 ===== */
+.drink-and-map {
+  display: flex;
+  flex-direction: column; /* ✅ 세로로 고정 */
+  align-items: stretch;
+  gap: 1.2rem;
+}
+
+/* DrinkMenu 내부가 float을 써도 부모에서 정리 */
+.drink-menu-block {
+  width: 100%;
+}
+.drink-menu-block::after {
+  content: "";
+  display: block;
+  clear: both; /* ✅ clearfix */
+}
+
+.booth-location {
+  width: 100%;
+  clear: both;
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1rem 2rem 2rem 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 85%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.booth-location h3 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+.booth-map {
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 250px;
+  padding-bottom: 20px;
+}
+
+.booth-map img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.booth-map-info {
+  background: #fff;
+  border-top: 1px solid #000;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 210px;
+}
+
+.booth-map-info img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Q&A 버튼 섹션 */
+.QandA-home {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 5rem;
+}
+
+.QandA-btn {
+  width: 85%;
+  min-height: 72px;
+  height: 10vh;
+  max-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: linear-gradient(to right, #ffedf8 40%, #f6b7dd 100%);
+  color: #575757;
+  border-radius: 1.5rem;
+  padding: 0rem 1.25rem;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 왼쪽 텍스트 줄바꿈 정리 */
+.QandA-btn .Q-title {
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
+}
+.QandA-btn .Q-subtitle {
+  line-height: 1.2;
+  opacity: 0.85;
+}
+
+.QandA-btn img {
+  flex: 0 0 auto;
+  height: 100%;
+  max-height: 80px;
+  width: auto;
+  margin-left: auto;
+  object-fit: contain;
+}
+
+/* 반응형: 작은 화면에서 이미지 조금 더 작게 */
+@media (max-width: 480px) {
+  .QandA-btn {
+    padding: 0.9rem 1rem;
+  }
+  .QandA-btn img {
+    height: 100%;
+    max-height: 64px;
+  }
+}
+
+/* ===== Credits (FAQ 톤 박스) ===== */
+.credits-section {
+  padding: 1.5rem 1.6rem;
+}
+
+.credits-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fff6fb 100%);
+  border: 0.1rem solid #ffd7e7;
+  border-radius: 2rem;
+  padding: 0.5rem 1.8rem;
+  box-shadow: 0 0.8rem 2.4rem rgba(0, 0, 0, 0.06);
+}
+
+/* 제목 줄: 좌측 그룹 + 우측 인스타 */
+.credits-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 1.2rem 0;
+  padding-right: 0.2rem;
+}
+
+.credits-title-left {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.credits-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: #ff5a91;
+  padding: 0.4rem 0.8rem;
+  border-radius: 1.2rem;
+  letter-spacing: 0.02em;
+}
+
+.credits-list {
+  display: grid;
+  row-gap: 0.8rem;
+}
+
+.credits-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1rem 1.2rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 90, 145, 0.05);
+}
+
+.credits-label {
+  flex: 0 0 3.2rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ff5a91;
+  white-space: nowrap;
+}
+
+.credits-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.credit-value {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.credits-value {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.credits-logo {
+  width: 2.4rem;
+  height: 2.4rem;
+  object-fit: contain;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  padding: 0.3rem;
+  box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.08);
+}
+
+/* 인스타 아이콘 */
+.credits-ig {
+  flex-shrink: 0;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 9999px;
+  border: 0.1rem solid #ffd7e7;
+  background: #ffffff;
+  color: #ff5a91;
+  transition: filter 120ms ease, background 120ms ease, transform 80ms ease;
+}
+.credits-ig:active {
+  transform: translateY(0.1rem);
+}
+.credits-ig:focus-visible {
+  outline: 0.2rem solid #ff5a91;
+  outline-offset: 0.2rem;
+}
+
+.ig-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
 @media (max-width: 380px) {
+  /* Hero 문구 축소 */
+  .hero-subtitle {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 2rem;
+  }
+
+  /* Hero 로고 조금 줄이기 */
+  .hero-logo-img {
+    width: 80%;
+  }
+
+  /* 부스 지도 높이 축소 */
   .booth-map {
-    height: 180px;
+    height: 160px;
+    padding-bottom: 10px;
   }
 
   .booth-map-info {
-    height: 150px;
+    height: 130px;
   }
 
-  .hero-subtitle {
-    font-size: 0.9rem;
-    line-height: 1.4;
+  /* Q&A 버튼 패딩 줄이기 */
+  .QandA-btn {
+    width: 90%;
+    min-height: 64px;
+    padding: 0.7rem 1rem;
   }
 
+  .QandA-btn img {
+    max-height: 56px;
+  }
+
+  /* 크레딧 카드 아이템 압축 */
   .credits-item {
-    padding: 0.8rem 1rem;
+    padding: 0.6rem 0.8rem;
+    gap: 0.2rem;
+  }
+
+  .credits-label {
+    flex: 0 0 2.8rem;
+    font-size: 0.7rem;
+  }
+
+  .credit-value,
+  .credits-value {
+    font-size: 0.65rem;
+  }
+
+  /* 인스타 아이콘 크기 줄이기 */
+  .credits-ig {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .ig-icon {
+    width: 1.4rem;
+    height: 1.4rem;
   }
 }
