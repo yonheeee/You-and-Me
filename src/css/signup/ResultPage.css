@@ -146,12 +146,6 @@
   height: 1.5rem;
 }
 
-@media (max-width: 376px) {
-  .arch-box {
-    height: 80vh;
-  }
-}
-
 /* ProfileCard를 화면 중앙에 */
 .profile-with-insta {
   position: relative;     /* 아이콘 absolute 기준 */
