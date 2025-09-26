@@ -1,17 +1,16 @@
 .App {
   display: flex;
-  justify-content: center;  /* 가운데 정렬 */
-  align-items: center;
-  min-height: 100vh;
-  background-color: #9e2525; /* 좌우/배경 회색 */
+  justify-content: center;     /* 가로만 가운데 정렬 */
+  align-items: flex-start;     /* ✅ 세로는 위에서부터 */
+  min-height: 100%;            /* ✅ 화면 강제 100vh → auto */
+  background-color: #9e2525;
 }
 
-/* 흰색 중앙 공간 */
 .App-container {
-  max-width: 430px;       /* 모바일 기기 폭 (아이폰 12 기준) */
-  min-height: 100vh;
+  max-width: 430px;
+  min-height: 100%;            /* ✅ 100vh 대신 auto/100% */
   background-color: #7b2c2c;
-  box-shadow: 0 0 20px rgba(0,0,0,0.15); /* 약간 그림자 */
+  box-shadow: 0 0 20px rgba(0,0,0,0.15);
   display: flex;
   flex-direction: column;
 }
