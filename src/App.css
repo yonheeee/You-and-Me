@@ -1,14 +1,14 @@
 .App {
   display: flex;
-  justify-content: center;     /* 가로만 가운데 정렬 */
-  align-items: flex-start;     /* ✅ 세로는 위에서부터 */
-  min-height: 100%;            /* ✅ 화면 강제 100vh → auto */
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100dvh;       /* ✅ 동적 뷰포트 */
   background-color: #9e2525;
 }
 
 .App-container {
   max-width: 430px;
-  min-height: 100%;            /* ✅ 100vh 대신 auto/100% */
+  min-height: auto;         /* ✅ 필요 이상 강제하지 않음 */
   background-color: #7b2c2c;
   box-shadow: 0 0 20px rgba(0,0,0,0.15);
   display: flex;
