@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import InfoForm from './jsx/signup/InfoForm2';
 
 // ✅ 서비스워커 등록 (푸시 알림/오프라인 캐시용)
 if ('serviceWorker' in navigator) {
@@ -22,6 +23,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />
+    <InfoForm/>
   </React.StrictMode>
 );
 
