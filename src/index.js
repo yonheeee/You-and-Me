@@ -4,19 +4,6 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-// ✅ 서비스워커 등록 (푸시 알림/오프라인 캐시용)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then((registration) => {
-        console.log('[SW] registered:', registration);
-      })
-      .catch((err) => {
-        console.error('[SW] registration failed:', err);
-      });
-  });
-}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

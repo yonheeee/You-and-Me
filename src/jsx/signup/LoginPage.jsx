@@ -1,3 +1,4 @@
+// src/jsx/signup/LoginOrGate.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../../css/signup/loginPage.css";
@@ -12,7 +13,7 @@ import PopUp from "../home/PopUp";
 
 // 🔑 Firebase Auth
 import { signInWithCustomToken } from "firebase/auth";
-import { auth, requestFcmToken, listenForegroundMessages } from "../../libs/firebase";
+import { auth } from "../../libs/firebase";
 
 const RAW_BASE = (process.env.REACT_APP_API_BASE_URL || "").trim();
 const API_BASE = RAW_BASE.replace(/\/+$/, ""); // 뒤 슬래시 정리
@@ -95,17 +96,6 @@ export default function LoginOrGate() {
             try {
               await signInWithCustomToken(auth, firebaseCustomToken);
               console.log("✅ Firebase Auth 로그인 성공");
-
-              // ✅ 로그인 성공 후 FCM 토큰 발급 & Firestore 저장
-              const userId = userData?.id || userData?.userId || userData?.uid;
-              if (userId) {
-                console.log("📌 추출된 uid:", userId);
-                const token = await requestFcmToken(String(userId));
-                console.log("📌 저장된 FCM 토큰:", token);
-                listenForegroundMessages();
-              } else {
-                console.warn("⚠️ userData.id 없음 → FCM 토큰 저장 불가", userData);
-              }
             } catch (err) {
               console.error("❌ Firebase 로그인 실패:", err);
             }
