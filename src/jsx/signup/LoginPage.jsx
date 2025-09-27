@@ -79,8 +79,6 @@ export default function LoginOrGate() {
 
           // ✅ firebaseCustomToken 위치 통합 처리
           const userData = data.user || {};
-          console.log("📌 백엔드 userData:", userData); // 디버깅 로그
-
           const firebaseCustomToken =
             data.firebaseCustomToken || userData.firebaseCustomToken || null;
 
@@ -99,14 +97,13 @@ export default function LoginOrGate() {
               console.log("✅ Firebase Auth 로그인 성공");
 
               // ✅ 로그인 성공 후 FCM 토큰 발급 & Firestore 저장
-              const uid = userData?.id || userData?.userId || userData?.uid;
-              console.log("📌 추출된 uid:", uid);
-
-              if (uid) {
-                await requestFcmToken(uid);
+              if (userData?.id) {
+                console.log("🟢 requestFcmToken 실행, userId:", userData.id);
+                const token = await requestFcmToken(userData.id);
+                console.log("🟢 requestFcmToken 결과:", token);
                 listenForegroundMessages();
               } else {
-                console.warn("⚠️ userData에 id/userId/uid 없음 → FCM 토큰 저장 스킵");
+                console.warn("⚠️ userData.id 없음 → FCM 토큰 저장 불가");
               }
             } catch (err) {
               console.error("❌ Firebase 로그인 실패:", err);

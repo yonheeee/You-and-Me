@@ -43,6 +43,9 @@ exports.sendChatNotification = functions
           return null;
         }
 
+        // 🎯 로그 추가: 실제로 어떤 토큰으로 발송하는지
+        console.log("🎯 발송 대상 토큰:", targetToken);
+
         // 🔹 푸시 알림 payload
         const payload = {
           notification: {
@@ -60,7 +63,7 @@ exports.sendChatNotification = functions
         await admin.messaging().sendToDevice(targetToken, payload);
         console.log("✅ 푸시 발송 성공:", receiverId);
       } catch (err) {
-        console.error("❌ 푸시 발송 실패:", err);
+        console.error("❌ 푸시 발송 실패:", JSON.stringify(err, null, 2));
       }
 
       return null;
