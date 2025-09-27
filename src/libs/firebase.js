@@ -1,4 +1,3 @@
-// src/libs/firebase.js
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -40,13 +39,16 @@ export async function requestFcmToken(userId) {
       return null;
     }
 
+    // 🔑 VAPID KEY 확인 로그
+    console.log("🔑 VAPID KEY:", process.env.REACT_APP_FIREBASE_VAPID_KEY);
+
     const token = await getToken(messaging, {
       vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY, // 콘솔에서 생성한 웹푸시 인증서 키
     });
 
     if (token) {
       // Firestore users/{uid} 문서에 fcmToken 저장
-      await setDoc(doc(db, "users", userId), { fcmToken: token }, { merge: true });
+      await setDoc(doc(db, "users", String(userId)), { fcmToken: token }, { merge: true });
       console.log("📌 저장된 FCM 토큰:", token);
     }
     return token;
