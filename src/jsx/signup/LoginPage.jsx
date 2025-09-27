@@ -12,7 +12,7 @@ import PopUp from "../home/PopUp";
 
 // 🔑 Firebase Auth
 import { signInWithCustomToken } from "firebase/auth";
-import { auth } from "../../libs/firebase";
+import { auth, requestFcmToken, listenForegroundMessages } from "../../libs/firebase";
 
 const RAW_BASE = (process.env.REACT_APP_API_BASE_URL || "").trim();
 const API_BASE = RAW_BASE.replace(/\/+$/, ""); // 뒤 슬래시 정리
@@ -95,6 +95,12 @@ export default function LoginOrGate() {
             try {
               await signInWithCustomToken(auth, firebaseCustomToken);
               console.log("✅ Firebase Auth 로그인 성공");
+
+              // ✅ 로그인 성공 후 FCM 토큰 발급 & Firestore 저장
+              if (userData?.id) {
+                await requestFcmToken(userData.id);
+                listenForegroundMessages();
+              }
             } catch (err) {
               console.error("❌ Firebase 로그인 실패:", err);
             }
@@ -200,17 +206,7 @@ export default function LoginOrGate() {
             </svg>
             카카오로 시작하기
           </button>
-
-          {/* ✅ 튜토리얼로 이동 버튼 */}
-          {/* <button
-            type="button"
-            className="tutorial-btn"
-            onClick={() => navigate("/tutorial/start")}
-          >
-            튜토리얼 시작하기
-          </button> */}
         </div>
-        {/* Q&A 버튼 */}
       </section>
 
       <section className="QandA">

@@ -289,7 +289,7 @@ export default function ChatRoom() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 전송
+  // === 메시지 전송 ===
   async function sendMessage() {
     const text = input.trim();
     if (!text) return;
@@ -313,9 +313,11 @@ export default function ChatRoom() {
         const newMsgRef = doc(msgColRef);
         const now = serverTimestamp();
 
+        // ✅ receiverId 추가
         tx.set(newMsgRef, {
           text,
           senderId: myIdNum,
+          receiverId: receiverIdNum,   // 👈 추가됨
           createdAt: now,
           readBy: { [String(myIdNum)]: true },
         });
