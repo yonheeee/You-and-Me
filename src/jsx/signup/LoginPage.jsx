@@ -97,13 +97,14 @@ export default function LoginOrGate() {
               console.log("✅ Firebase Auth 로그인 성공");
 
               // ✅ 로그인 성공 후 FCM 토큰 발급 & Firestore 저장
-              if (userData?.id) {
-                console.log("🟢 requestFcmToken 실행, userId:", userData.id);
-                const token = await requestFcmToken(userData.id);
-                console.log("🟢 requestFcmToken 결과:", token);
+              const userId = userData?.id || userData?.userId || userData?.uid;
+              if (userId) {
+                console.log("📌 추출된 uid:", userId);
+                const token = await requestFcmToken(String(userId));
+                console.log("📌 저장된 FCM 토큰:", token);
                 listenForegroundMessages();
               } else {
-                console.warn("⚠️ userData.id 없음 → FCM 토큰 저장 불가");
+                console.warn("⚠️ userData.id 없음 → FCM 토큰 저장 불가", userData);
               }
             } catch (err) {
               console.error("❌ Firebase 로그인 실패:", err);
