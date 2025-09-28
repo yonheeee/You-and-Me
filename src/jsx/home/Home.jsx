@@ -2,7 +2,7 @@ import "../../css/home/Home.css";
 import FlirtingTabs from "./FlirtingTabs";
 import Logo from "../../image/loginPage/logo2.png";
 import MatchingBanner from "../../image/home/match.svg";
-import Map from "../../image/home/map.svg"; // ✅ 위치 지도
+import Map from "../../image/home/map.png"; // ✅ 위치 지도
 import MapInfo from "../../image/home/mapinfo.png"; // ✅ 번호 안내
 import QandA from "../../image/home/q&a.svg";
 
