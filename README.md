@@ -70,6 +70,9 @@
   </tr>
 </table>
 
+<br>
+
+
 ## 6. 페이지 구성요소
 
 ### [초기화면]
@@ -84,9 +87,13 @@
 
 | 내 정보 입력  |
 |----------|
-![first page](/Image/start/info.png)|
-![first page](/Image/start/mbti.png)|  
-![first page](/Image/start/major.png)| 
+<table>
+    <tr><td align="center"><img src="./Image/start/info.png" width="500"/><br/></td></tr>
+  <tr>
+    <td align="center"><img src="./Image/start/mbti.png" width="500"/><br/></td>
+    <td align="center"><img src="./Image/start/major.png" width="500"/><br/></td>
+  </tr>
+</table>
 
 <br>
 
@@ -104,12 +111,12 @@
 |----------|
 <table>
   <tr>
-    <td align="center"><img src="./Image/result/수달.png" width="800"/><br/></td>
-    <td align="center"><img src="./Image/result/dog.png" width="800"/><br/></td>
+    <td align="center"><img src="./Image/result/수달.png" width="500"/><br/></td>
+    <td align="center"><img src="./Image/result/dog.png" width="500"/><br/></td>
   </tr>
   <tr>
-    <td align="center"><img src="./Image/result/cat.png" width="800"/><br/></td>
-    <td align="center"><img src="./Image/result/panda.png" width="800"/><br/></td>
+    <td align="center"><img src="./Image/result/cat.png" width="500"/><br/></td>
+    <td align="center"><img src="./Image/result/panda.png" width="500"/><br/></td>
   </tr>
 </table>
 
