@@ -96,6 +96,7 @@
 |----------|
 ![first page](/Image/start/test.png)|
 
+<br>
 
 ### [테스트 결과]
 
@@ -111,3 +112,14 @@
     <td align="center"><img src="./Image/result/panda.png" width="800"/><br/></td>
   </tr>
 </table>
+
+<br>
+
+### [메인 화면]
+
+| 메인 화면 |
+|----------|
+![first page](/Image/main/main1.png)|
+![first page](/Image/main/main2.png)|
+![first page](/Image/main/main3.png)|
+![first page](/Image/main/main4.png)|
