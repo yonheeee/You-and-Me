@@ -85,7 +85,7 @@
 
 ### [내 정보 입력]
 
-| 내 정보 입력  |
+| 내 정보 입력 |
 |----------|
 <table>
     <tr><td align="center"><img src="./Image/start/info.png" width="500"/><br/></td></tr>
@@ -128,5 +128,4 @@
 |----------|
 ![first page](/Image/main/main1.png)|
 ![first page](/Image/main/main2.png)|
-![first page](/Image/main/main3.png)|
 ![first page](/Image/main/main4.png)|
