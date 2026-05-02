@@ -1,9 +1,9 @@
-![logo](/Image/logo.png)
+<img src="./Image/logo.png" width="150"/>
 
 # ❤️ 한서대 축제 한정 인연 매칭 앱 "너랑 나랑" 
 
 
-<img src="./Image/베너.png" width="500"/>
+<img src="./Image/베너.png" width="300"/>
 
 <br>
 
@@ -65,7 +65,49 @@
 
 <table>
   <tr>
-    <td align="center"><img src="./Image/신문1.png" width="300"/><br/></td>
-    <td align="center"><img src="./Image/신문2.jpeg" width="305"/><br/></td>
+    <td align="center"><img src="./Image/신문1.png" width="800"/><br/></td>
+    <td align="center"><img src="./Image/신문2.jpeg" width="810"/><br/></td>
+  </tr>
+</table>
+
+## 6. 페이지 구성요소
+
+### [초기화면]
+
+| 초기화면 |
+|----------|
+![first page](/Image/start/start.png)|
+
+<br>
+
+### [내 정보 입력]
+
+| 내 정보 입력  |
+|----------|
+![first page](/Image/start/info.png)|
+![first page](/Image/start/mbti.png)|  
+![first page](/Image/start/major.png)| 
+
+<br>
+
+### [이상형 테스트]
+
+| 이상형 테스트 |
+|----------|
+![first page](/Image/start/test.png)|
+
+
+### [테스트 결과]
+
+| 테스트 결과 |
+|----------|
+<table>
+  <tr>
+    <td align="center"><img src="./Image/result/수달.png" width="800"/><br/></td>
+    <td align="center"><img src="./Image/result/dog.png" width="800"/><br/></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./Image/result/cat.png" width="800"/><br/></td>
+    <td align="center"><img src="./Image/result/panda.png" width="800"/><br/></td>
   </tr>
 </table>
