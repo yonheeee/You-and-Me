@@ -88,10 +88,10 @@
 | 내 정보 입력 |
 |----------|
 <table>
-    <tr><td align="center"><img src="./Image/start/info.png" width="500"/><br/></td></tr>
+    <tr><td align="center"><img src="./Image/start/info.png" width="450"/><br/></td></tr>
   <tr>
-    <td align="center"><img src="./Image/start/mbti.png" width="500"/><br/></td>
-    <td align="center"><img src="./Image/start/major.png" width="500"/><br/></td>
+    <td align="center"><img src="./Image/start/mbti.png" width="450"/><br/></td>
+    <td align="center"><img src="./Image/start/major.png" width="450"/><br/></td>
   </tr>
 </table>
 
@@ -111,12 +111,12 @@
 |----------|
 <table>
   <tr>
-    <td align="center"><img src="./Image/result/수달.png" width="500"/><br/></td>
-    <td align="center"><img src="./Image/result/dog.png" width="500"/><br/></td>
+    <td align="center"><img src="./Image/result/수달.png" width="450"/><br/></td>
+    <td align="center"><img src="./Image/result/dog.png" width="450"/><br/></td>
   </tr>
   <tr>
-    <td align="center"><img src="./Image/result/cat.png" width="500"/><br/></td>
-    <td align="center"><img src="./Image/result/panda.png" width="500"/><br/></td>
+    <td align="center"><img src="./Image/result/cat.png" width="450"/><br/></td>
+    <td align="center"><img src="./Image/result/panda.png" width="450"/><br/></td>
   </tr>
 </table>
 
@@ -128,15 +128,15 @@
 |----------|
 <table>
   <tr>
-    <td align="center"><img src="./Image/result/수달.png" width="500"/><br/></td>
+    <td align="center"><img src="./Image/main/main1.png" width="500"/><br/></td>
   </tr>
   <tr>
-    <td align="center"><img src="./Image/result/수달.png" width="500"/><br/></td>
+    <td align="center"><img src="./Image/main/main2.png" width="500"/><br/></td>
   </tr>
   <tr>
-    <td align="center"><img src="./Image/result/수달.png" width="500"/><br/></td>
+    <td align="center"><img src="./Image/main/main3.jpg" width="400"/><br/></td>
   </tr>
   <tr>
-    <td align="center"><img src="./Image/result/수달.png" width="500"/><br/></td>
+    <td align="center"><img src="./Image/main/main4.png" width="500"/><br/></td>
   </tr>
 </table>
