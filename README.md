@@ -3,7 +3,7 @@
 # ❤️ 한서대 축제 한정 인연 매칭 앱 "너랑 나랑" 
 
 
-<img src="./Image/베너.png" width="300"/>
+<img src="./Image/베너.png" width="400"/>
 
 <br>
 
@@ -126,6 +126,17 @@
 
 | 메인 화면 |
 |----------|
-![first page](/Image/main/main1.png)|
-![first page](/Image/main/main2.png)|
-![first page](/Image/main/main4.png)|
+<table>
+  <tr>
+    <td align="center"><img src="./Image/result/수달.png" width="500"/><br/></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./Image/result/수달.png" width="500"/><br/></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./Image/result/수달.png" width="500"/><br/></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./Image/result/수달.png" width="500"/><br/></td>
+  </tr>
+</table>
