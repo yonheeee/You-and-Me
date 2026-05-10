@@ -45,7 +45,7 @@
 
 - Communication & Management: Notion (기획서 및 일정 관리), Slack/Discord (실시간 소통)
 
-- Development Context: * Frontend: React (또는 사용한 프레임워크)
+- Development Context: Frontend: React 
 
 - Backend: Spring Boot 
 
