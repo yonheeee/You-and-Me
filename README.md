@@ -128,16 +128,16 @@
 |----------|
 <table>
   <tr>
-    <td align="center"><img src="./Image/main/main1.png" width="450"/><br/></td>
+    <td align="center"><img src="./Image/main/main1.png" width="300"/><br/></td>
   </tr>
   <tr>
-    <td align="center"><img src="./Image/main/main2.png" width="450"/><br/></td>
+    <td align="center"><img src="./Image/main/main2.png" width="350"/><br/></td>
   </tr>
   <tr>
-    <td align="center"><img src="./Image/main/main3.jpg" width="500"/><br/></td>
+    <td align="center"><img src="./Image/main/main3.jpg" width="400"/><br/></td>
   </tr>
   <tr>
-    <td align="center"><img src="./Image/main/main4.png" width="450"/><br/></td>
+    <td align="center"><img src="./Image/main/main4.png" width="350"/><br/></td>
   </tr>
 </table>
 
@@ -151,7 +151,9 @@
   <tr>
     <td align="center"><img src="./Image/matching/exmatching.png" width="400"/><br/></td>
     <td align="center"><img src="./Image/matching/aftermatching.png" width="500"/><br/></td>
-    <td align="center"><img src="./Image/matching/nomatching.png" width="510"/><br/></td>
+  </tr>
+  <tr>
+     <td align="center"><img src="./Image/matching/nomatching.png" width="510"/><br/></td>
   </tr>
 </table>
 
