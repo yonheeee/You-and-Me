@@ -111,12 +111,12 @@
 |----------|
 <table>
   <tr>
-    <td align="center"><img src="./Image/result/수달.png" width="400"/><br/></td>
-    <td align="center"><img src="./Image/result/dog.png" width="400"/><br/></td>
+    <td align="center"><img src="./Image/result/수달.png" width="350"/><br/></td>
+    <td align="center"><img src="./Image/result/dog.png" width="350"/><br/></td>
   </tr>
   <tr>
-    <td align="center"><img src="./Image/result/cat.png" width="400"/><br/></td>
-    <td align="center"><img src="./Image/result/panda.png" width="400"/><br/></td>
+    <td align="center"><img src="./Image/result/cat.png" width="350"/><br/></td>
+    <td align="center"><img src="./Image/result/panda.png" width="350"/><br/></td>
   </tr>
 </table>
 
@@ -140,3 +140,43 @@
     <td align="center"><img src="./Image/main/main4.png" width="450"/><br/></td>
   </tr>
 </table>
+
+<br>
+
+### [매칭 화면]
+
+| 매칭 화면 |
+|----------|
+<table>
+  <tr>
+    <td align="center"><img src="./Image/matching/exmatching.png" width="400"/><br/></td>
+    <td align="center"><img src="./Image/matching/aftermatching.png" width="500"/><br/></td>
+    <td align="center"><img src="./Image/matching/nomatching.png" width="510"/><br/></td>
+  </tr>
+</table>
+
+<br>
+ 
+### [채팅 목록]
+
+| 채팅 목록 |
+| -------- |
+![first page](/Image/chating/chatinglist.png)|
+
+
+<br>
+
+### [채팅 화면]
+
+| 채팅 화면 |
+| -------- |
+| ![first page](/Image/chating/chating.png) |
+
+<br>
+
+### [랭킹 화면]
+
+| 랭킹 화면  |
+| ----------------------------------------- |
+| ![first page](/Image/ranking/flut.png) |
+| ![first page](/Image/ranking/mbtiranking.png) |
